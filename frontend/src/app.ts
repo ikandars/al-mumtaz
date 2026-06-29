@@ -172,6 +172,7 @@ export class AlMumtazCrm extends LitElement {
   @state() private loadingStudentClasses = false
   @state() private selectedPaymentStudentId = ''
   @state() private paymentApplyAdminFee = true
+  @state() private classSearchQuery = ''
 
   // Participant & Payment Search States
   @state() private participantSearchQuery = ''
@@ -1145,6 +1146,7 @@ export class AlMumtazCrm extends LitElement {
     this.loadingStudentClasses = false
     this.selectedPaymentStudentId = ''
     this.paymentApplyAdminFee = true
+    this.classSearchQuery = ''
     this.participantSearchQuery = ''
     this.paymentSearchQuery = ''
     this.userSearchQuery = ''
@@ -2220,6 +2222,15 @@ export class AlMumtazCrm extends LitElement {
   }
 
   private renderClassesList() {
+    const query = this.classSearchQuery.toLowerCase().trim()
+    const filteredClasses = this.classes.filter(c => {
+      if (query === '') return true
+      const matchesName = c.name && c.name.toLowerCase().includes(query)
+      const matchesDesc = c.description && c.description.toLowerCase().includes(query)
+      const matchesTutors = c.tutors && c.tutors.some(t => t.name && t.name.toLowerCase().includes(query))
+      return matchesName || matchesDesc || matchesTutors
+    })
+
     return html`
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
         <h2>Manajemen Kelas</h2>
@@ -2230,13 +2241,24 @@ export class AlMumtazCrm extends LitElement {
         ` : ''}
       </div>
 
+      <!-- Search Box -->
+      <div class="input-group" style="position:relative; margin-bottom:16px;">
+        <input class="input-field" type="text" placeholder="Cari nama kelas, keterangan, atau pengajar..." 
+               .value=${this.classSearchQuery} 
+               @input=${(e: any) => this.classSearchQuery = e.target.value} 
+               style="padding-left:38px;" />
+        <div style="position:absolute; left:12px; top:12px; color:var(--text-muted);">
+          ${this.iconSearch()}
+        </div>
+      </div>
+
       <div class="item-list">
-        ${this.classes.length === 0 ? html`
+        ${filteredClasses.length === 0 ? html`
           <div class="empty-state">
             ${this.iconClasses()}
-            <p>Belum ada kelas terdaftar.</p>
+            <p>${query === '' ? 'Belum ada kelas terdaftar.' : 'Tidak ada kelas yang cocok dengan pencarian Anda.'}</p>
           </div>
-        ` : this.classes.map(c => html`
+        ` : filteredClasses.map(c => html`
           <div class="list-card" style="cursor: default;" @click=${() => {}}>
             <div class="list-card-header">
               <span class="list-card-title">${c.name}</span>
