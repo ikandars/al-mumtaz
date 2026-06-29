@@ -175,6 +175,7 @@ export class AlMumtazCrm extends LitElement {
   @state() private selectedTutorShareSummary: any = null
   @state() private selectedTutorShareDetails: any[] = []
   @state() private loadingTutorShareDetails = false
+  @state() private selectedSettingsTab: 'notifications' | 'admin-fee' | 'account' = 'notifications'
 
   // Participant & Payment Search States
   @state() private participantSearchQuery = ''
@@ -1152,6 +1153,7 @@ export class AlMumtazCrm extends LitElement {
     this.selectedTutorShareSummary = null
     this.selectedTutorShareDetails = []
     this.loadingTutorShareDetails = false
+    this.selectedSettingsTab = 'notifications'
     this.participantSearchQuery = ''
     this.paymentSearchQuery = ''
     this.userSearchQuery = ''
@@ -2462,85 +2464,111 @@ export class AlMumtazCrm extends LitElement {
   private renderSettings() {
     return html`
       <h2>Pengaturan Sistem</h2>
-      <p style="margin-bottom: 24px;">Atur biaya admin transaksi siswa dan notifikasi browser.</p>
+      <p style="margin-bottom: 20px; font-size:13px;">Kelola pemberitahuan, aturan biaya admin lembaga, serta keamanan akun pengguna.</p>
 
-      <!-- Web Push Notifications block -->
-      <div class="card" style="margin-bottom: 20px;">
-        <h3 style="margin-bottom: 8px;">Pemberitahuan Sistem (Web Notifications)</h3>
-        <p style="font-size: 13px; margin-bottom: 14px;">Aktifkan notifikasi untuk menerima pemberitahuan instan saat ada iuran masuk atau persetujuan transaksi.</p>
-        
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <span style="font-size: 13px; font-weight: 500;">
-            Status Izin: 
-            <strong style="color: ${this.notificationPermission === 'granted' ? 'var(--secondary)' : this.notificationPermission === 'denied' ? '#ef4444' : '#f59e0b'};">
-              ${this.notificationPermission === 'granted' ? 'Diizinkan' : this.notificationPermission === 'denied' ? 'Ditolak' : 'Belum Ditanyakan'}
-            </strong>
-          </span>
-          
-          ${this.notificationPermission !== 'granted' ? html`
-            <button class="btn btn-primary" style="padding: 8px 14px; font-size:12px;" @click=${this.requestWebNotifications}>
-              Aktifkan Notifikasi
-            </button>
-          ` : html`
-            <button class="btn btn-secondary" style="padding: 8px 14px; font-size:12px;" @click=${() => this.showToast('Notifikasi sudah aktif!', 'success')}>
-              Sudah Aktif
-            </button>
-          `}
-        </div>
+      <div style="display:flex; gap:8px; margin-bottom:16px; overflow-x:auto; padding-bottom:4px;">
+        <button class="tab-btn ${this.selectedSettingsTab === 'notifications' ? 'tab-btn-active' : ''}" 
+                @click=${() => { this.selectedSettingsTab = 'notifications'; }}>
+          Notifikasi
+        </button>
+        <button class="tab-btn ${this.selectedSettingsTab === 'admin-fee' ? 'tab-btn-active' : ''}" 
+                @click=${() => { this.selectedSettingsTab = 'admin-fee'; }}>
+          Biaya Admin
+        </button>
+        <button class="tab-btn ${this.selectedSettingsTab === 'account' ? 'tab-btn-active' : ''}" 
+                @click=${() => { this.selectedSettingsTab = 'account'; }}>
+          Kelola Akun
+        </button>
       </div>
 
-      <!-- Admin Fee configuration form -->
-      <form class="card" @submit=${this.handleSaveSettings}>
-        <h3 style="margin-bottom: 12px; border-bottom:1px solid #f3f4f6; padding-bottom:8px;">Konfigurasi Biaya Admin</h3>
-        
-        <div class="checkbox-group" style="margin-bottom: 20px;">
-          <input type="checkbox" id="admin-fee-enabled" 
-                 .checked=${this.adminFeeConfig.enabled}
-                 @change=${(e: any) => this.adminFeeConfig = { ...this.adminFeeConfig, enabled: e.target.checked }} />
-          <label for="admin-fee-enabled" style="font-size:14px; font-weight:600;">Aktifkan Biaya Admin Transaksi</label>
-        </div>
-
-        ${this.adminFeeConfig.enabled ? html`
-          <h4 style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px;">Aturan Batas Nominal (Tiers)</h4>
+      ${this.selectedSettingsTab === 'notifications' ? html`
+        <!-- Web Push Notifications block -->
+        <div class="card" style="margin-bottom: 20px;">
+          <h3 style="margin-bottom: 8px;">Pemberitahuan Sistem (Web Notifications)</h3>
+          <p style="font-size: 13px; margin-bottom: 14px;">Aktifkan notifikasi untuk menerima pemberitahuan instan saat ada iuran masuk atau persetujuan transaksi.</p>
           
-          <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
-            ${this.adminFeeConfig.tiers.map((t, idx) => html`
-              <div style="display:grid; grid-template-columns: 1fr 1fr 40px; gap:8px; align-items:center;">
-                <input class="input-field" type="number" placeholder="Min nominal (Rp)" 
-                       .value=${t.min_amount} 
-                       @input=${(e: any) => this.updateSettingTier(idx, 'min_amount', e.target.value)} />
-                <input class="input-field" type="number" placeholder="Biaya Admin (Rp)" 
-                       .value=${t.fee} 
-                       @input=${(e: any) => this.updateSettingTier(idx, 'fee', e.target.value)} />
-                <button type="button" class="btn btn-danger" style="padding:8px; background-color:#fee2e2; border-radius:8px;" @click=${() => this.removeSettingTier(idx)}>
-                  ${this.iconClose()}
-                </button>
-              </div>
-            `)}
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size: 13px; font-weight: 500;">
+              Status Izin: 
+              <strong style="color: ${this.notificationPermission === 'granted' ? 'var(--secondary)' : this.notificationPermission === 'denied' ? '#ef4444' : '#f59e0b'};">
+                ${this.notificationPermission === 'granted' ? 'Diizinkan' : this.notificationPermission === 'denied' ? 'Ditolak' : 'Belum Ditanyakan'}
+              </strong>
+            </span>
+            
+            ${this.notificationPermission !== 'granted' ? html`
+              <button class="btn btn-primary" style="padding: 8px 14px; font-size:12px;" @click=${this.requestWebNotifications}>
+                Aktifkan Notifikasi
+              </button>
+            ` : html`
+              <button class="btn btn-secondary" style="padding: 8px 14px; font-size:12px;" @click=${() => this.showToast('Notifikasi sudah aktif!', 'success')}>
+                Sudah Aktif
+              </button>
+            `}
+          </div>
+        </div>
+      ` : ''}
+
+      ${this.selectedSettingsTab === 'admin-fee' ? html`
+        <!-- Admin Fee configuration form -->
+        <form class="card" @submit=${this.handleSaveSettings}>
+          <h3 style="margin-bottom: 12px; border-bottom:1px solid #f3f4f6; padding-bottom:8px;">Konfigurasi Biaya Admin</h3>
+          
+          <div class="checkbox-group" style="margin-bottom: 20px;">
+            <input type="checkbox" id="admin-fee-enabled" 
+                   .checked=${this.adminFeeConfig.enabled}
+                   @change=${(e: any) => this.adminFeeConfig = { ...this.adminFeeConfig, enabled: e.target.checked }} />
+            <label for="admin-fee-enabled" style="font-size:14px; font-weight:600;">Aktifkan Biaya Admin Transaksi</label>
           </div>
 
-          <button type="button" class="btn btn-secondary" style="width:100%; margin-bottom: 20px; font-size: 13px; padding: 8px 12px;" @click=${this.addSettingTier}>
-            + Tambah Aturan Baru
-          </button>
-        ` : ''}
+          ${this.adminFeeConfig.enabled ? html`
+            <h4 style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px;">Aturan Batas Nominal (Tiers)</h4>
+            
+            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
+              ${this.adminFeeConfig.tiers.map((t, idx) => html`
+                <div style="display:grid; grid-template-columns: 1fr 1fr 40px; gap:8px; align-items:center;">
+                  <input class="input-field" type="number" placeholder="Min nominal (Rp)" 
+                         .value=${t.min_amount} 
+                         @input=${(e: any) => this.updateSettingTier(idx, 'min_amount', e.target.value)} />
+                  <input class="input-field" type="number" placeholder="Biaya Admin (Rp)" 
+                         .value=${t.fee} 
+                         @input=${(e: any) => this.updateSettingTier(idx, 'fee', e.target.value)} />
+                  <button type="button" class="btn btn-danger" style="padding:8px; background-color:#fee2e2; border-radius:8px;" @click=${() => this.removeSettingTier(idx)}>
+                    ${this.iconClose()}
+                  </button>
+                </div>
+              `)}
+            </div>
 
-        ${this.hasPermission('update') ? html`
-          <button type="submit" class="btn btn-primary" style="width:100%;" ?disabled=${this.submitting}>
-            ${this.submitting ? 'Memproses...' : 'Simpan Konfigurasi'}
-          </button>
-        ` : html`<p style="font-size:12px; text-align:center; color:var(--status-rejected);">Hanya staff tingkat edit/update yang dapat mengubah konfigurasi.</p>`}
-      </form>
+            <button type="button" class="btn btn-secondary" style="width:100%; margin-bottom: 20px; font-size: 13px; padding: 8px 12px;" @click=${this.addSettingTier}>
+              + Tambah Aturan Baru
+            </button>
+          ` : ''}
 
-      <!-- Section: Manajemen Pengguna & Keluar -->
-      <div style="margin-top: 24px; display:flex; flex-direction:column; gap:12px;">
-        <button class="btn btn-secondary" style="width:100%;" @click=${() => this.changeTab('users')}>
-          ${this.iconUsers()} Kelola Akun Staff & Guru
-        </button>
-        
-        <button class="btn btn-danger" style="width:100%; border: 1px solid #fee2e2;" @click=${this.logout}>
-          Keluar dari Sistem (Logout)
-        </button>
-      </div>
+          ${this.hasPermission('update') ? html`
+            <button type="submit" class="btn btn-primary" style="width:100%;" ?disabled=${this.submitting}>
+              ${this.submitting ? 'Memproses...' : 'Simpan Konfigurasi'}
+            </button>
+          ` : html`<p style="font-size:12px; text-align:center; color:var(--status-rejected);">Hanya staff tingkat edit/update yang dapat mengubah konfigurasi.</p>`}
+        </form>
+      ` : ''}
+
+      ${this.selectedSettingsTab === 'account' ? html`
+        <!-- Section: Manajemen Pengguna & Keluar -->
+        <div class="card" style="display:flex; flex-direction:column; gap:16px;">
+          <h3 style="margin-bottom: 4px;">Kelola Akun & Keamanan</h3>
+          <p style="font-size: 13px; color:var(--text-muted); margin-bottom: 8px;">Atur akun pengguna staff/guru yang memiliki hak akses masuk ke sistem, atau keluar dari sesi aktif.</p>
+          
+          <button class="btn btn-secondary" style="width:100%; display:flex; justify-content:center; align-items:center; gap:8px;" @click=${() => this.changeTab('users')}>
+            ${this.iconUsers()} Kelola Akun Staff & Guru
+          </button>
+          
+          <div style="border-top: 1px solid #f3f4f6; padding-top: 16px; margin-top: 8px;">
+            <button class="btn btn-danger" style="width:100%; border: 1px solid #fee2e2;" @click=${this.logout}>
+              Keluar dari Sistem (Logout)
+            </button>
+          </div>
+        </div>
+      ` : ''}
     `;
   }
 
