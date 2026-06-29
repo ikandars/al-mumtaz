@@ -1212,10 +1212,6 @@ app.put('/api/tutor-shares/:id/status', checkPermission('update'), async (c) => 
   const { status } = await c.req.json()
   const db = c.env.DB
 
-  if (!status || !['paid', 'unpaid'].includes(status)) {
-    return c.json({ error: 'Status tidak valid' }, 400)
-  }
-
   try {
     await db.prepare('UPDATE tutor_shares SET status = ? WHERE id = ?').bind(status, id).run()
     return c.json({ success: true })
@@ -1224,23 +1220,66 @@ app.put('/api/tutor-shares/:id/status', checkPermission('update'), async (c) => 
   }
 })
 
+// 4b. Update Tutor Shares Bulk Status: PUT /api/tutor-shares/bulk-status
+app.put('/api/tutor-shares/bulk-status', checkPermission('update'), async (c) => {
+  const { tutor_id, month, status } = await c.req.json()
+  const db = c.env.DB
+
+  try {
+    await db.prepare(`
+      UPDATE tutor_shares
+      SET status = ?
+      WHERE tutor_id = ? AND payment_id IN (
+        SELECT id FROM payments WHERE strftime('%Y-%m', payment_date) = ?
+      )
+    `).bind(status, tutor_id, month).run()
+    return c.json({ success: true })
+  } catch (err: any) {
+    return c.json({ error: err.message }, 500)
+  }
+})
+
 // 5. Tutor Monthly Shares Summary: GET /api/reports/tutor-shares-summary
 app.get('/api/reports/tutor-shares-summary', async (c) => {
+  const tutorId = c.req.query('tutor_id')
+  const month = c.req.query('month')
+  const status = c.req.query('status') // 'paid' or 'unpaid'
   const db = c.env.DB
+
   try {
-    const list = await db.prepare(
-      `SELECT t.id as tutor_id, u.name as tutor_name,
-              strftime('%Y-%m', p.payment_date) as month,
-              SUM(CASE WHEN ts.status = 'paid' THEN ts.amount ELSE 0 END) as total_paid,
-              SUM(CASE WHEN ts.status = 'unpaid' THEN ts.amount ELSE 0 END) as total_unpaid,
-              SUM(ts.amount) as total_amount
-       FROM tutor_shares ts
-       JOIN tutors t ON ts.tutor_id = t.id
-       JOIN users u ON t.user_id = u.id
-       JOIN payments p ON ts.payment_id = p.id
-       GROUP BY t.id, strftime('%Y-%m', p.payment_date)
-       ORDER BY month DESC, tutor_name ASC`
-    ).all()
+    let query = `
+      SELECT t.id as tutor_id, u.name as tutor_name,
+             strftime('%Y-%m', p.payment_date) as month,
+             SUM(CASE WHEN ts.status = 'paid' THEN ts.amount ELSE 0 END) as total_paid,
+             SUM(CASE WHEN ts.status = 'unpaid' THEN ts.amount ELSE 0 END) as total_unpaid,
+             SUM(ts.amount) as total_amount
+      FROM tutor_shares ts
+      JOIN tutors t ON ts.tutor_id = t.id
+      JOIN users u ON t.user_id = u.id
+      JOIN payments p ON ts.payment_id = p.id
+      WHERE 1=1
+    `
+    const params: any[] = []
+    if (tutorId) {
+      query += ` AND ts.tutor_id = ?`
+      params.push(tutorId)
+    }
+    if (month) {
+      query += ` AND strftime('%Y-%m', p.payment_date) = ?`
+      params.push(month)
+    }
+
+    query += ` GROUP BY t.id, strftime('%Y-%m', p.payment_date)`
+
+    if (status === 'paid') {
+      query += ` HAVING total_unpaid = 0`
+    } else if (status === 'unpaid') {
+      query += ` HAVING total_unpaid > 0`
+    }
+
+    query += ` ORDER BY month DESC, tutor_name ASC`
+
+    const list = await db.prepare(query).bind(...params).all()
     return c.json(list.results)
   } catch (err: any) {
     return c.json({ error: err.message }, 500)

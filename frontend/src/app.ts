@@ -161,7 +161,6 @@ export class AlMumtazCrm extends LitElement {
   @state() private selectedReportMonth = new Date().toISOString().substring(0, 7) // YYYY-MM
   @state() private classReportData: any[] = []
   @state() private tutorSharesReportData: any[] = []
-  @state() private tutorSharesSummaryData: any[] = []
   @state() private cashflowReportData: any = null
   @state() private selectedReportTutorId = ''
   @state() private selectedReportShareStatus = ''
@@ -173,7 +172,9 @@ export class AlMumtazCrm extends LitElement {
   @state() private selectedPaymentStudentId = ''
   @state() private paymentApplyAdminFee = true
   @state() private classSearchQuery = ''
-  @state() private selectedTutorShare: any = null
+  @state() private selectedTutorShareSummary: any = null
+  @state() private selectedTutorShareDetails: any[] = []
+  @state() private loadingTutorShareDetails = false
 
   // Participant & Payment Search States
   @state() private participantSearchQuery = ''
@@ -1148,7 +1149,9 @@ export class AlMumtazCrm extends LitElement {
     this.selectedPaymentStudentId = ''
     this.paymentApplyAdminFee = true
     this.classSearchQuery = ''
-    this.selectedTutorShare = null
+    this.selectedTutorShareSummary = null
+    this.selectedTutorShareDetails = []
+    this.loadingTutorShareDetails = false
     this.participantSearchQuery = ''
     this.paymentSearchQuery = ''
     this.userSearchQuery = ''
@@ -1227,7 +1230,6 @@ export class AlMumtazCrm extends LitElement {
         this.loadCashflowReport()
       } else {
         this.loadTutorSharesReport()
-        this.loadTutorSharesSummary()
       }
     }
   }
@@ -2630,7 +2632,7 @@ export class AlMumtazCrm extends LitElement {
 
       <div style="display:flex; gap:8px; margin-bottom:16px; overflow-x:auto; padding-bottom:4px;">
         <button class="tab-btn ${this.selectedReportTab === 'tutor' ? 'tab-btn-active' : ''}" 
-                @click=${() => { this.selectedReportTab = 'tutor'; this.loadTutorSharesReport(); this.loadTutorSharesSummary(); }}>
+                @click=${() => { this.selectedReportTab = 'tutor'; this.loadTutorSharesReport(); }}>
           Mukafaah Pengajar
         </button>
         <button class="tab-btn ${this.selectedReportTab === 'class' ? 'tab-btn-active' : ''}" 
@@ -2718,40 +2720,9 @@ export class AlMumtazCrm extends LitElement {
   // Tutor Payout shares list & summary reports view
   private renderTutorSharesReportView() {
     return html`
-      <!-- Summary Section -->
-      <div style="margin-bottom: 20px;">
-        <h3 style="font-size:15px; margin-bottom:10px;">Rekap Bulanan Mukafaah</h3>
-        <div class="report-container">
-          <table class="report-table">
-            <thead>
-              <tr>
-                <th>Nama Pengajar</th>
-                <th>Bulan</th>
-                <th>Sudah Dibayar</th>
-                <th>Belum Dibayar</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${this.tutorSharesSummaryData.length === 0 ? html`
-                <tr>
-                  <td colspan="4" style="text-align:center; color:var(--text-muted);">Belum ada data rekap mukafaah.</td>
-                </tr>
-              ` : this.tutorSharesSummaryData.map(row => html`
-                <tr>
-                  <td style="font-weight:600;">${row.tutor_name}</td>
-                  <td style="font-family:monospace;">${row.month}</td>
-                  <td style="color:var(--status-approved); font-weight:600;">${this.formatRupiah(row.total_paid)}</td>
-                  <td style="color:var(--status-pending); font-weight:600;">${this.formatRupiah(row.total_unpaid)}</td>
-                </tr>
-              `)}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
       <!-- Filters & Shares List -->
       <div class="card" style="margin-bottom:16px;">
-        <h3 style="font-size:14px; margin-bottom:10px;">Filter Daftar Transaksi Mukafaah</h3>
+        <h3 style="font-size:14px; margin-bottom:10px;">Filter Rekap Bulanan Mukafaah</h3>
         <div class="form-grid">
           <div class="form-row" style="flex-wrap: wrap; gap: 12px;">
             <div class="input-group" style="flex: 1; min-width: 120px;">
@@ -2781,44 +2752,51 @@ export class AlMumtazCrm extends LitElement {
         <table class="report-table">
           <thead>
             <tr>
-              <th>Rincian Pembayaran</th>
-              <th>Tutor / Nominal</th>
-              <th>Status</th>
-              ${this.hasPermission('update') ? html`<th style="text-align:right;">Aksi</th>` : ''}
+              <th>Bulan</th>
+              <th>Nama Pengajar</th>
+              <th style="text-align: right;">Sudah Dibayar</th>
+              <th style="text-align: right;">Belum Dibayar</th>
+              <th style="text-align: right;">Total Mukafaah</th>
+              <th style="text-align: center; width: 110px;">Status</th>
+              ${this.hasPermission('update') ? html`<th style="text-align:right; width: 110px;">Aksi</th>` : ''}
             </tr>
           </thead>
           <tbody>
             ${this.tutorSharesReportData.length === 0 ? html`
               <tr>
-                <td colspan="4" style="text-align:center; color:var(--text-muted);">Tidak ada transaksi mukafaah ditemukan.</td>
+                <td colspan="7" style="text-align:center; color:var(--text-muted);">Tidak ada rekap bulanan mukafaah ditemukan.</td>
               </tr>
-            ` : this.tutorSharesReportData.map(row => html`
-              <tr style="cursor: pointer;" @click=${() => this.openTutorShareDetails(row)}>
-                <td>
-                  <div style="font-weight:600; color:var(--primary);">${row.class_name}</div>
-                  <div style="font-size:11px; color:var(--text-muted);">Siswa: ${row.student_name}</div>
-                  <div style="font-size:10px; color:var(--text-muted); font-family:monospace;">Tgl: ${row.payment_date}</div>
-                </td>
-                <td>
-                  <div style="font-weight:600;">${row.tutor_name}</div>
-                  <div style="font-size:12px; color:var(--status-approved); font-weight:600;">Share: ${this.formatRupiah(row.amount)}</div>
-                </td>
-                <td>
-                  <span class="badge ${row.share_status === 'paid' ? 'badge-approved' : 'badge-pending'}">
-                    ${row.share_status === 'paid' ? 'Lunas (Paid)' : 'Belum (Unpaid)'}
-                  </span>
-                </td>
-                ${this.hasPermission('update') ? html`
-                  <td style="text-align:right;" @click=${(e: Event) => e.stopPropagation()}>
-                    <button class="btn ${row.share_status === 'paid' ? 'btn-secondary' : 'btn-primary'}" 
-                            style="padding:6px 10px; font-size:11px; border-radius:6px; font-weight:600;"
-                            @click=${() => this.toggleTutorShareStatus(row.id, row.share_status)}>
-                      ${row.share_status === 'paid' ? 'Set Unpaid' : 'Set Paid'}
-                    </button>
+            ` : this.tutorSharesReportData.map(row => {
+              const isFullyPaid = row.total_unpaid === 0;
+              const isFullyUnpaid = row.total_paid === 0;
+              return html`
+                <tr style="cursor: pointer;" @click=${() => this.openTutorShareDetails(row)}>
+                  <td style="font-family:monospace;">${row.month}</td>
+                  <td style="font-weight:600;">${row.tutor_name}</td>
+                  <td style="text-align: right; color:var(--status-approved); font-weight:600;">${this.formatRupiah(row.total_paid)}</td>
+                  <td style="text-align: right; color:var(--status-pending); font-weight:600;">${this.formatRupiah(row.total_unpaid)}</td>
+                  <td style="text-align: right; font-weight:700;">${this.formatRupiah(row.total_amount)}</td>
+                  <td style="text-align: center;">
+                    ${isFullyPaid ? html`
+                      <span class="badge badge-approved">Lunas (Paid)</span>
+                    ` : isFullyUnpaid ? html`
+                      <span class="badge badge-pending">Belum (Unpaid)</span>
+                    ` : html`
+                      <span class="badge" style="background-color: #fef3c7; color: #d97706; font-size:10px;">Sebagian (Partial)</span>
+                    `}
                   </td>
-                ` : ''}
-              </tr>
-            `)}
+                  ${this.hasPermission('update') ? html`
+                    <td style="text-align:right;" @click=${(e: Event) => e.stopPropagation()}>
+                      <button class="btn ${isFullyPaid ? 'btn-secondary' : 'btn-primary'}" 
+                              style="padding:6px 10px; font-size:11px; border-radius:6px; font-weight:600; width: 90px;"
+                              @click=${() => this.toggleTutorShareStatus(row.tutor_id, row.month, isFullyPaid ? 'paid' : 'unpaid')}>
+                        ${isFullyPaid ? 'Set Unpaid' : 'Set Paid'}
+                      </button>
+                    </td>
+                  ` : ''}
+                </tr>
+              `;
+            })}
           </tbody>
         </table>
       </div>
@@ -3455,7 +3433,7 @@ export class AlMumtazCrm extends LitElement {
   private async loadTutorSharesReport() {
     this.loading = true
     try {
-      let url = '/api/reports/tutor-shares'
+      let url = '/api/reports/tutor-shares-summary'
       const params = []
       if (this.selectedReportTutorId) params.push(`tutor_id=${this.selectedReportTutorId}`)
       if (this.selectedReportShareStatus) params.push(`status=${this.selectedReportShareStatus}`)
@@ -3469,36 +3447,40 @@ export class AlMumtazCrm extends LitElement {
     }
   }
 
-  private async loadTutorSharesSummary() {
-    try {
-      const data = await this.fetchApi('/api/reports/tutor-shares-summary')
-      this.tutorSharesSummaryData = data
-    } catch(e) {}
-  }
 
-  private async toggleTutorShareStatus(id: string, currentStatus: string) {
+
+  private async toggleTutorShareStatus(tutorId: string, month: string, currentStatus: string) {
     const newStatus = currentStatus === 'paid' ? 'unpaid' : 'paid'
     this.loading = true
     try {
-      await this.fetchApi(`/api/tutor-shares/${id}/status`, {
+      await this.fetchApi('/api/tutor-shares/bulk-status', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify({ tutor_id: tutorId, month: month, status: newStatus })
       })
-      this.showToast('Status mukafaah berhasil diperbarui', 'success')
+      this.showToast('Status mukafaah bulanan berhasil diperbarui', 'success')
       await this.loadTutorSharesReport()
-      await this.loadTutorSharesSummary()
     } catch(e) {} finally {
       this.loading = false
     }
   }
 
-  private openTutorShareDetails(row: any) {
-    this.selectedTutorShare = row
+  private async openTutorShareDetails(row: any) {
+    this.selectedTutorShareSummary = row
     this.activeModal = 'tutor-share-detail'
+    this.loadingTutorShareDetails = true
+    this.selectedTutorShareDetails = []
+    try {
+      const data = await this.fetchApi(`/api/reports/tutor-shares?tutor_id=${row.tutor_id}&month=${row.month}`)
+      this.selectedTutorShareDetails = data
+    } catch(e) {
+      this.showToast('Gagal memuat rincian transaksi mukafaah', 'error')
+    } finally {
+      this.loadingTutorShareDetails = false
+    }
   }
 
-  private printTutorShareReceiptPDF(ts: any) {
+  private printTutorShareReceiptPDF(summary: any, details: any[]) {
     const printWindow = window.open('', '_blank', 'width=900,height=800')
     if (!printWindow) {
       this.showToast('Gagal membuka jendela cetak. Pastikan pop-up diizinkan.', 'error')
@@ -3506,17 +3488,33 @@ export class AlMumtazCrm extends LitElement {
     }
 
     const logoUrl = window.location.origin + '/logo.jpg'
-    const amountWord = this.terbilangRupiah(ts.amount)
+    const amountWord = this.terbilangRupiah(summary.total_paid)
     const currentDate = new Date().toLocaleDateString('id-ID', {
       day: 'numeric',
       month: 'long',
       year: 'numeric'
     })
 
+    const [year, monthNum] = summary.month.split('-')
+    const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
+    const monthLabel = `${monthNames[parseInt(monthNum, 10) - 1]} ${year}`
+
+    const rowsHtml = details
+      .filter(d => d.share_status === 'paid')
+      .map((d, index) => `
+        <tr>
+          <td style="text-align: center;">${index + 1}</td>
+          <td>${d.class_name}</td>
+          <td>${d.student_name}</td>
+          <td style="text-align: center;">${this.formatDate(d.payment_date)}</td>
+          <td style="text-align: right; font-weight: 600;">${this.formatRupiah(d.amount)}</td>
+        </tr>
+      `).join('')
+
     printWindow.document.write(`
       <html>
         <head>
-          <title>Kuitansi Mukafaah - ${ts.tutor_name}</title>
+          <title>Kuitansi Mukafaah Bulanan - ${summary.tutor_name}</title>
           <style>
             @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
             body {
@@ -3551,21 +3549,28 @@ export class AlMumtazCrm extends LitElement {
             .receipt-table {
               width: 100%;
               border-collapse: collapse;
-              margin-bottom: 30px;
+              margin-bottom: 20px;
             }
-            .receipt-table td {
-              padding: 12px 10px;
-              font-size: 14px;
-              border-bottom: 1px solid #f3f4f6;
+            .receipt-table td, .receipt-table th {
+              padding: 10px;
+              font-size: 13px;
+              border: 1px solid #e5e7eb;
+            }
+            .receipt-table th {
+              background-color: #f9fafb;
+              font-weight: 600;
+              color: #4b5563;
             }
             .label-cell {
               color: #6b7280;
               font-weight: 500;
               width: 180px;
+              border: none !important;
             }
             .value-cell {
               font-weight: 600;
               color: #1f2937;
+              border: none !important;
             }
             .amount-box {
               background-color: #f7f5ee;
@@ -3579,7 +3584,7 @@ export class AlMumtazCrm extends LitElement {
               margin-top: 10px;
             }
             .signature-section {
-              margin-top: 50px;
+              margin-top: 40px;
               width: 100%;
               font-size: 14px;
             }
@@ -3609,35 +3614,55 @@ export class AlMumtazCrm extends LitElement {
 
           <div class="receipt-title">Bukti Tanda Terima Mukafaah</div>
 
-          <table class="receipt-table">
+          <table style="width: 100%; margin-bottom: 20px; border-collapse: collapse;">
             <tr>
-              <td class="label-cell">Nomor Transaksi:</td>
-              <td class="value-cell" style="font-family: monospace; font-size: 13px;">${ts.id}</td>
+              <td class="label-cell" style="padding: 6px 0;">Nomor Referensi:</td>
+              <td class="value-cell" style="padding: 6px 0; font-family: monospace;">MUK-${summary.tutor_id.substring(0, 8)}-${summary.month}</td>
             </tr>
             <tr>
-              <td class="label-cell">Telah Dibayarkan Kepada:</td>
-              <td class="value-cell" style="font-size: 16px; color: var(--primary);">${ts.tutor_name}</td>
+              <td class="label-cell" style="padding: 6px 0;">Telah Dibayarkan Kepada:</td>
+              <td class="value-cell" style="padding: 6px 0; font-size: 15px; color: var(--primary);">${summary.tutor_name}</td>
             </tr>
             <tr>
-              <td class="label-cell">Untuk Pembayaran:</td>
-              <td class="value-cell">Penyaluran Mukafaah Kelas <strong>${ts.class_name}</strong> (Siswa: ${ts.student_name})</td>
+              <td class="label-cell" style="padding: 6px 0;">Tanggal Payout:</td>
+              <td class="value-cell" style="padding: 6px 0;">${currentDate}</td>
             </tr>
             <tr>
-              <td class="label-cell">Tanggal Payout:</td>
-              <td class="value-cell">${currentDate}</td>
+              <td class="label-cell" style="padding: 6px 0;">Periode Mukafaah:</td>
+              <td class="value-cell" style="padding: 6px 0;">${monthLabel}</td>
             </tr>
             <tr>
-              <td class="label-cell">Uang Sejumlah:</td>
-              <td class="value-cell" style="font-style: italic; font-weight: normal; color: #4b5563;">
+              <td class="label-cell" style="padding: 6px 0;">Uang Sejumlah:</td>
+              <td class="value-cell" style="padding: 6px 0; font-style: italic; font-weight: normal; color: #4b5563;">
                 "${amountWord} Rupiah"
               </td>
             </tr>
           </table>
 
-          <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+          <h3 style="font-size: 14px; margin-bottom: 10px; color: #374151;">Rincian Kelas:</h3>
+          <table class="receipt-table">
+            <thead>
+              <tr>
+                <th style="width: 40px; text-align: center;">No</th>
+                <th>Nama Kelas</th>
+                <th>Siswa</th>
+                <th style="width: 130px; text-align: center;">Tanggal Iuran</th>
+                <th style="width: 150px; text-align: right;">Mukafaah</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+              <tr>
+                <td colspan="4" style="text-align: right; font-weight: 700;">Total Mukafaah Dibayarkan:</td>
+                <td style="text-align: right; font-weight: 700; color: #c3a64d; font-size: 14px;">${this.formatRupiah(summary.total_paid)}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 30px;">
             <div>
               <div class="amount-box">
-                Jumlah: ${this.formatRupiah(ts.amount)}
+                Jumlah: ${this.formatRupiah(summary.total_paid)}
               </div>
               <div style="font-size: 11px; color: #9ca3af; margin-top: 8px;">
                 *Dokumen ini merupakan bukti pembayaran mukafaah resmi yang sah dari Rumah Qur'an Al-Mumtaz.
@@ -4946,58 +4971,95 @@ export class AlMumtazCrm extends LitElement {
   }
 
   private renderTutorShareDetails() {
-    const ts = this.selectedTutorShare
-    if (!ts) return html``
+    const summary = this.selectedTutorShareSummary
+    if (!summary) return html``
 
-    const isPaid = ts.share_status === 'paid'
+    const isFullyPaid = summary.total_unpaid === 0
+    const isFullyUnpaid = summary.total_paid === 0
+    
+    const [year, monthNum] = summary.month.split('-')
+    const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
+    const monthLabel = `${monthNames[parseInt(monthNum, 10) - 1]} ${year}`
 
     return html`
       <div>
         <div style="margin-bottom: 20px; border-bottom: 1px solid #f3f4f6; padding-bottom: 12px;">
           <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span class="badge ${isPaid ? 'badge-approved' : 'badge-pending'}">
-              ${isPaid ? 'Lunas (Paid)' : 'Belum (Unpaid)'}
-            </span>
-            <span style="font-size:12px; color:var(--text-muted);">${this.formatDate(ts.payment_date)}</span>
+            ${isFullyPaid ? html`
+              <span class="badge badge-approved">Lunas (Paid)</span>
+            ` : isFullyUnpaid ? html`
+              <span class="badge badge-pending">Belum (Unpaid)</span>
+            ` : html`
+              <span class="badge" style="background-color: #fef3c7; color: #d97706; font-size:10px;">Sebagian (Partial)</span>
+            `}
+            <span style="font-size:12px; color:var(--text-muted);">${monthLabel}</span>
           </div>
-          <h1 style="font-size:20px; margin-top:8px;">${ts.tutor_name}</h1>
+          <h1 style="font-size:20px; margin-top:8px;">${summary.tutor_name}</h1>
           <p style="font-size:13px; color:var(--text-muted); margin-top:2px;">
-            Penerima Mukafaah Pengajar
+            Rekap Bulanan Mukafaah Pengajar
           </p>
         </div>
 
-        <!-- Breakdown Details -->
         <div style="background-color:#f9fafb; border-radius:12px; padding:16px; margin-bottom:16px; font-size:13px; display:flex; flex-direction:column; gap:8px;">
           <div style="display:flex; justify-content:space-between;">
-            <span style="color:var(--text-muted);">Nama Kelas:</span>
-            <strong style="color:var(--text);">${ts.class_name}</strong>
+            <span style="color:var(--text-muted);">Sudah Dibayar:</span>
+            <strong style="color:var(--status-approved);">${this.formatRupiah(summary.total_paid)}</strong>
           </div>
           <div style="display:flex; justify-content:space-between;">
-            <span style="color:var(--text-muted);">Siswa (Peserta):</span>
-            <strong style="color:var(--text);">${ts.student_name}</strong>
-          </div>
-          <div style="display:flex; justify-content:space-between;">
-            <span style="color:var(--text-muted);">Total Bayar Siswa:</span>
-            <strong style="color:var(--text);">${this.formatRupiah(ts.payment_amount)}</strong>
+            <span style="color:var(--text-muted);">Belum Dibayar:</span>
+            <strong style="color:var(--status-pending);">${this.formatRupiah(summary.total_unpaid)}</strong>
           </div>
           <div style="display:flex; justify-content:space-between; border-top:1px dashed #e5e7eb; padding-top:8px;">
-            <span style="font-weight:600; color:var(--text);">Mukafaah Pengajar (Net):</span>
-            <strong style="color:var(--primary); font-size:14px;">${this.formatRupiah(ts.amount)}</strong>
+            <span style="font-weight:600; color:var(--text);">Total Mukafaah (Gross):</span>
+            <strong style="color:var(--primary); font-size:14px;">${this.formatRupiah(summary.total_amount)}</strong>
           </div>
         </div>
 
-        ${isPaid ? html`
-          <button class="btn btn-secondary" style="width:100%; margin-bottom:12px; display:flex; align-items:center; justify-content:center; gap:8px;" @click=${() => this.printTutorShareReceiptPDF(ts)}>
+        <h3 style="font-size:14px; margin-bottom:10px; color:var(--text);">Rincian Transaksi per Kelas:</h3>
+
+        ${this.loadingTutorShareDetails ? html`
+          <div style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px;">
+            Memuat rincian transaksi...
+          </div>
+        ` : this.selectedTutorShareDetails.length === 0 ? html`
+          <div style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px; background:#f9fafb; border-radius:12px;">
+            Tidak ada transaksi pembayaran untuk periode ini.
+          </div>
+        ` : html`
+          <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px; max-height:250px; overflow-y:auto; padding-right:4px;">
+            ${this.selectedTutorShareDetails.map(d => html`
+              <div class="card" style="padding:10px; border-color:#e5e7eb; display:flex; flex-direction:column; gap:4px; font-size:12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <strong style="color:var(--text);">${d.class_name}</strong>
+                  <span class="badge ${d.share_status === 'paid' ? 'badge-approved' : 'badge-pending'}" style="font-size:10px; padding:2px 6px;">
+                    ${d.share_status === 'paid' ? 'Paid' : 'Unpaid'}
+                  </span>
+                </div>
+                <div style="display:flex; justify-content:space-between; color:var(--text-muted);">
+                  <span>Siswa: ${d.student_name}</span>
+                  <span>Tgl: ${this.formatDate(d.payment_date)}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; border-top:1px dotted #f3f4f6; padding-top:4px; margin-top:2px;">
+                  <span>Pembayaran: ${this.formatRupiah(d.payment_amount)}</span>
+                  <span style="font-weight:600; color:var(--primary);">Share: ${this.formatRupiah(d.amount)}</span>
+                </div>
+              </div>
+            `)}
+          </div>
+        `}
+
+        ${summary.total_paid > 0 ? html`
+          <button class="btn btn-secondary" style="width:100%; margin-bottom:12px; display:flex; align-items:center; justify-content:center; gap:8px;" @click=${() => this.printTutorShareReceiptPDF(summary, this.selectedTutorShareDetails)}>
             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-            Cetak Bukti Tanda Bayar (PDF)
+            Cetak Bukti Tanda Terima (PDF)
           </button>
         ` : ''}
 
         ${this.hasPermission('update') ? html`
           <div class="card" style="padding:14px; border-color:#e5e7eb; margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px;">
-            <label class="input-label" style="margin:0;">Ubah Status Pembayaran</label>
-            <button class="btn ${isPaid ? 'btn-danger' : 'btn-primary'}" style="width: 100%; font-size: 13px;" @click=${() => { this.toggleTutorShareStatus(ts.id, ts.share_status); this.activeModal = null; }}>
-              ${isPaid ? 'Batalkan Pembayaran (Set Unpaid)' : 'Bayarkan Mukafaah (Set Paid)'}
+            <label class="input-label" style="margin:0;">Ubah Status Pembayaran Bulanan</label>
+            <button class="btn ${isFullyPaid ? 'btn-danger' : 'btn-primary'}" style="width: 100%; font-size: 13px;" @click=${() => { this.toggleTutorShareStatus(summary.tutor_id, summary.month, isFullyPaid ? 'paid' : 'unpaid'); this.activeModal = null; }}>
+              ${isFullyPaid ? 'Batalkan Semua Pembayaran (Set Unpaid)' : 'Bayarkan Semua Mukafaah (Set Paid)'}
             </button>
           </div>
         ` : ''}
