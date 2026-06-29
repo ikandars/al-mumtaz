@@ -167,6 +167,7 @@ export class AlMumtazCrm extends LitElement {
   @state() private selectedReportShareStatus = ''
   @state() private selectedReportTutorMonth = ''
   @state() private showLoginPassword = false
+  @state() private submitting = false
 
   // Participant & Payment Search States
   @state() private participantSearchQuery = ''
@@ -1135,6 +1136,7 @@ export class AlMumtazCrm extends LitElement {
     this.selectedReportShareStatus = ''
     this.selectedReportTutorMonth = ''
     this.showLoginPassword = false
+    this.submitting = false
     this.participantSearchQuery = ''
     this.paymentSearchQuery = ''
     this.userSearchQuery = ''
@@ -1287,7 +1289,7 @@ export class AlMumtazCrm extends LitElement {
       return
     }
 
-    this.loading = true
+    this.submitting = true
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
@@ -1309,7 +1311,7 @@ export class AlMumtazCrm extends LitElement {
     } catch (err: any) {
       this.showToast(err.message, 'error')
     } finally {
-      this.loading = false
+      this.submitting = false
     }
   }
 
@@ -1391,7 +1393,7 @@ export class AlMumtazCrm extends LitElement {
       username, password, permissions
     }
 
-    this.loading = true
+    this.submitting = true
     try {
       if (this.activeModal === 'user-add') {
         await this.fetchApi('/api/users', {
@@ -1414,7 +1416,7 @@ export class AlMumtazCrm extends LitElement {
       this.loadParticipants()
       this.loadDashboardStats()
     } catch (e) {} finally {
-      this.loading = false
+      this.submitting = false
     }
   }
 
@@ -1454,7 +1456,7 @@ export class AlMumtazCrm extends LitElement {
 
     const payload = { name, description, monthly_fee, status, tutor_ids, has_admin_fee }
 
-    this.loading = true
+    this.submitting = true
     try {
       if (this.activeModal === 'class-add') {
         await this.fetchApi('/api/classes', {
@@ -1475,7 +1477,7 @@ export class AlMumtazCrm extends LitElement {
       this.loadClasses()
       this.loadDashboardStats()
     } catch(e){} finally {
-      this.loading = false
+      this.submitting = false
     }
   }
 
@@ -1500,7 +1502,7 @@ export class AlMumtazCrm extends LitElement {
     const participant_id = select.value
     if (!participant_id) return
 
-    this.loading = true
+    this.submitting = true
     try {
       await this.fetchApi(`/api/classes/${this.selectedClass?.id}/members`, {
         method: 'POST',
@@ -1511,7 +1513,7 @@ export class AlMumtazCrm extends LitElement {
       this.loadClassMembers(this.selectedClass!.id)
       this.loadClasses()
     } catch(e){} finally {
-      this.loading = false
+      this.submitting = false
     }
   }
 
@@ -1567,7 +1569,7 @@ export class AlMumtazCrm extends LitElement {
 
     const payload = { name, fee, start_date, end_date, class_id: class_id || null }
 
-    this.loading = true
+    this.submitting = true
     try {
       if (this.activeModal === 'exam-add') {
         await this.fetchApi('/api/exam-events', {
@@ -1587,7 +1589,7 @@ export class AlMumtazCrm extends LitElement {
       this.activeModal = null
       this.loadExamEvents()
     } catch(e){} finally {
-      this.loading = false
+      this.submitting = false
     }
   }
 
@@ -1635,7 +1637,7 @@ export class AlMumtazCrm extends LitElement {
     if (notes) formData.append('notes', notes)
     if (file) formData.append('attachment', file)
 
-    this.loading = true
+    this.submitting = true
     try {
       await this.fetchApi('/api/payments', {
         method: 'POST',
@@ -1646,7 +1648,7 @@ export class AlMumtazCrm extends LitElement {
       this.loadPayments()
       this.loadDashboardStats()
     } catch(e){} finally {
-      this.loading = false
+      this.submitting = false
     }
   }
 
@@ -1691,7 +1693,7 @@ export class AlMumtazCrm extends LitElement {
   // 5. Save Settings Configuration
   private async handleSaveSettings(e: Event) {
     e.preventDefault()
-    this.loading = true
+    this.submitting = true
     try {
       await this.fetchApi('/api/settings', {
         method: 'PUT',
@@ -1704,7 +1706,7 @@ export class AlMumtazCrm extends LitElement {
       this.showToast('Pengaturan biaya admin berhasil disimpan', 'success')
       this.loadSettings()
     } catch(e){} finally {
-      this.loading = false
+      this.submitting = false
     }
   }
 
@@ -2461,7 +2463,9 @@ export class AlMumtazCrm extends LitElement {
         ` : ''}
 
         ${this.hasPermission('update') ? html`
-          <button type="submit" class="btn btn-primary" style="width:100%;">Simpan Konfigurasi</button>
+          <button type="submit" class="btn btn-primary" style="width:100%;" ?disabled=${this.submitting}>
+            ${this.submitting ? 'Memproses...' : 'Simpan Konfigurasi'}
+          </button>
         ` : html`<p style="font-size:12px; text-align:center; color:var(--status-rejected);">Hanya staff tingkat edit/update yang dapat mengubah konfigurasi.</p>`}
       </form>
 
@@ -3281,8 +3285,8 @@ export class AlMumtazCrm extends LitElement {
             </div>
           </div>
 
-          <button class="btn btn-primary" type="submit" style="width:100%;">
-            Masuk ke Aplikasi
+          <button class="btn btn-primary" type="submit" style="width:100%;" ?disabled=${this.submitting}>
+            ${this.submitting ? 'Memproses...' : 'Masuk ke Aplikasi'}
           </button>
         </form>
 
@@ -3578,7 +3582,9 @@ export class AlMumtazCrm extends LitElement {
           <textarea class="input-field" id="pay-notes" rows="2" placeholder="Masukkan keterangan (opsional)"></textarea>
         </div>
 
-        <button type="submit" class="btn btn-primary" style="width:100%; margin-top: 10px;">Simpan & Input Pembayaran</button>
+        <button type="submit" class="btn btn-primary" style="width:100%; margin-top: 10px;" ?disabled=${this.submitting}>
+          ${this.submitting ? 'Memproses...' : 'Simpan & Input Pembayaran'}
+        </button>
       </form>
     `;
   }
@@ -3801,7 +3807,9 @@ export class AlMumtazCrm extends LitElement {
           </div>
         ` : ''}
 
-        <button type="submit" class="btn btn-primary" style="width:100%;">${isAdd ? 'Tambah Pengguna' : 'Simpan Perubahan'}</button>
+        <button type="submit" class="btn btn-primary" style="width:100%;" ?disabled=${this.submitting}>
+          ${this.submitting ? 'Memproses...' : (isAdd ? 'Tambah Pengguna' : 'Simpan Perubahan')}
+        </button>
       </form>
     `;
   }
@@ -3858,7 +3866,9 @@ export class AlMumtazCrm extends LitElement {
           `}
         </div>
 
-        <button type="submit" class="btn btn-primary" style="width:100%;">${isAdd ? 'Buat Kelas' : 'Simpan Perubahan'}</button>
+        <button type="submit" class="btn btn-primary" style="width:100%;" ?disabled=${this.submitting}>
+          ${this.submitting ? 'Memproses...' : (isAdd ? 'Buat Kelas' : 'Simpan Perubahan')}
+        </button>
       </form>
     `;
   }
@@ -3885,7 +3895,9 @@ export class AlMumtazCrm extends LitElement {
                 <option value="">-- Pilih Siswa --</option>
                 ${this.participants.map(p => html`<option value=${p.id}>${p.name}</option>`)}
               </select>
-              <button type="submit" class="btn btn-primary" style="padding:8px 16px; font-size:12px;">+ Daftarkan</button>
+              <button type="submit" class="btn btn-primary" style="padding:8px 16px; font-size:12px;" ?disabled=${this.submitting}>
+                ${this.submitting ? 'Memproses...' : '+ Daftarkan'}
+              </button>
             </div>
           </form>
         ` : ''}
@@ -3978,7 +3990,9 @@ export class AlMumtazCrm extends LitElement {
             <input class="input-field" type="date" id="exam-end-date" .value=${e?.end_date || ''} required />
           </div>
         </div>
-        <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;">${isAdd ? 'Jadwalkan Ujian' : 'Simpan Perubahan'}</button>
+        <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;" ?disabled=${this.submitting}>
+          ${this.submitting ? 'Memproses...' : (isAdd ? 'Jadwalkan Ujian' : 'Simpan Perubahan')}
+        </button>
       </form>
     `;
   }
@@ -4010,7 +4024,9 @@ export class AlMumtazCrm extends LitElement {
 
         <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:20px;">
           <button type="button" class="btn btn-secondary" style="padding:10px 16px;" @click=${() => this.activeModal = null}>Batal</button>
-          <button type="submit" class="btn btn-primary" style="padding:10px 16px;">Simpan Pengeluaran</button>
+          <button type="submit" class="btn btn-primary" style="padding:10px 16px;" ?disabled=${this.submitting}>
+            ${this.submitting ? 'Memproses...' : 'Simpan Pengeluaran'}
+          </button>
         </div>
       </form>
     `;
@@ -4042,7 +4058,7 @@ export class AlMumtazCrm extends LitElement {
       formData.append('attachment', file)
     }
 
-    this.loading = true
+    this.submitting = true
     try {
       await this.fetchApi('/api/expenses', {
         method: 'POST',
@@ -4055,7 +4071,7 @@ export class AlMumtazCrm extends LitElement {
     } catch(err: any) {
       this.showToast(err.message || 'Gagal mencatat pengeluaran', 'error')
     } finally {
-      this.loading = false
+      this.submitting = false
     }
   }
 
@@ -4117,7 +4133,9 @@ export class AlMumtazCrm extends LitElement {
 
         <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:20px;">
           <button type="button" class="btn btn-secondary" style="padding:10px 16px;" @click=${() => this.activeModal = null}>Batal</button>
-          <button type="submit" class="btn btn-primary" style="padding:10px 16px;">Simpan Pemasukan</button>
+          <button type="submit" class="btn btn-primary" style="padding:10px 16px;" ?disabled=${this.submitting}>
+            ${this.submitting ? 'Memproses...' : 'Simpan Pemasukan'}
+          </button>
         </div>
       </form>
     `;
@@ -4152,7 +4170,7 @@ export class AlMumtazCrm extends LitElement {
       formData.append('attachment', file)
     }
 
-    this.loading = true
+    this.submitting = true
     try {
       await this.fetchApi('/api/other-incomes', {
         method: 'POST',
@@ -4165,7 +4183,7 @@ export class AlMumtazCrm extends LitElement {
     } catch(err: any) {
       this.showToast(err.message || 'Gagal mencatat pemasukan', 'error')
     } finally {
-      this.loading = false
+      this.submitting = false
     }
   }
 
