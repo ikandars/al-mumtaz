@@ -2558,14 +2558,16 @@ export class AlMumtazCrm extends LitElement {
           <h3 style="margin-bottom: 4px;">Kelola Akun & Keamanan</h3>
           <p style="font-size: 13px; color:var(--text-muted); margin-bottom: 8px;">Atur akun pengguna staff/guru yang memiliki hak akses masuk ke sistem, atau keluar dari sesi aktif.</p>
           
-          <button class="btn btn-secondary" style="width:100%; display:flex; justify-content:center; align-items:center; gap:8px;" @click=${() => this.changeTab('users')}>
-            ${this.iconUsers()} Kelola Akun Staff & Guru
-          </button>
-          
-          <div style="border-top: 1px solid #f3f4f6; padding-top: 16px; margin-top: 8px;">
-            <button class="btn btn-danger" style="width:100%; border: 1px solid #fee2e2;" @click=${this.logout}>
-              Keluar dari Sistem (Logout)
+          <div style="display:flex; flex-direction:column; gap:12px; align-items:flex-start;">
+            <button class="btn btn-secondary" style="display:flex; align-items:center; gap:8px; font-size:13px; padding:8px 16px;" @click=${() => this.changeTab('users')}>
+              ${this.iconUsers()} Kelola Akun Staff & Guru
             </button>
+            
+            <div style="border-top: 1px solid #f3f4f6; padding-top: 16px; width:100%; display:flex; justify-content:flex-start;">
+              <button class="btn btn-danger" style="border: 1px solid #fee2e2; font-size:13px; padding:8px 16px;" @click=${this.logout}>
+                Keluar dari Sistem (Logout)
+              </button>
+            </div>
           </div>
         </div>
       ` : ''}
