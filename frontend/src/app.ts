@@ -137,7 +137,7 @@ export class AlMumtazCrm extends LitElement {
   @state() private adminFeeConfig: AdminFeeConfig = { enabled: true, tiers: [] }
 
   // Modal controls
-  @state() private activeModal: 'payment-add' | 'payment-detail' | 'user-add' | 'user-edit' | 'class-add' | 'class-edit' | 'class-members' | 'exam-add' | 'exam-edit' | 'participant-detail' | 'expense-add' | 'other-income-add' | null = null
+  @state() private activeModal: 'payment-add' | 'payment-detail' | 'user-add' | 'user-edit' | 'class-add' | 'class-edit' | 'class-members' | 'exam-add' | 'exam-edit' | 'participant-detail' | 'expense-add' | 'other-income-add' | 'tutor-share-detail' | null = null
 
   // Finance & Expenses states
   @state() private financeTab: 'payments' | 'expenses' | 'other_incomes' = 'payments'
@@ -173,6 +173,7 @@ export class AlMumtazCrm extends LitElement {
   @state() private selectedPaymentStudentId = ''
   @state() private paymentApplyAdminFee = true
   @state() private classSearchQuery = ''
+  @state() private selectedTutorShare: any = null
 
   // Participant & Payment Search States
   @state() private participantSearchQuery = ''
@@ -1147,6 +1148,7 @@ export class AlMumtazCrm extends LitElement {
     this.selectedPaymentStudentId = ''
     this.paymentApplyAdminFee = true
     this.classSearchQuery = ''
+    this.selectedTutorShare = null
     this.participantSearchQuery = ''
     this.paymentSearchQuery = ''
     this.userSearchQuery = ''
@@ -2791,7 +2793,7 @@ export class AlMumtazCrm extends LitElement {
                 <td colspan="4" style="text-align:center; color:var(--text-muted);">Tidak ada transaksi mukafaah ditemukan.</td>
               </tr>
             ` : this.tutorSharesReportData.map(row => html`
-              <tr>
+              <tr style="cursor: pointer;" @click=${() => this.openTutorShareDetails(row)}>
                 <td>
                   <div style="font-weight:600; color:var(--primary);">${row.class_name}</div>
                   <div style="font-size:11px; color:var(--text-muted);">Siswa: ${row.student_name}</div>
@@ -2807,7 +2809,7 @@ export class AlMumtazCrm extends LitElement {
                   </span>
                 </td>
                 ${this.hasPermission('update') ? html`
-                  <td style="text-align:right;">
+                  <td style="text-align:right;" @click=${(e: Event) => e.stopPropagation()}>
                     <button class="btn ${row.share_status === 'paid' ? 'btn-secondary' : 'btn-primary'}" 
                             style="padding:6px 10px; font-size:11px; border-radius:6px; font-weight:600;"
                             @click=${() => this.toggleTutorShareStatus(row.id, row.share_status)}>
@@ -3489,6 +3491,178 @@ export class AlMumtazCrm extends LitElement {
     }
   }
 
+  private openTutorShareDetails(row: any) {
+    this.selectedTutorShare = row
+    this.activeModal = 'tutor-share-detail'
+  }
+
+  private printTutorShareReceiptPDF(ts: any) {
+    const printWindow = window.open('', '_blank', 'width=900,height=800')
+    if (!printWindow) {
+      this.showToast('Gagal membuka jendela cetak. Pastikan pop-up diizinkan.', 'error')
+      return
+    }
+
+    const logoUrl = window.location.origin + '/logo.jpg'
+    const amountWord = this.terbilangRupiah(ts.amount)
+    const currentDate = new Date().toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    })
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Kuitansi Mukafaah - ${ts.tutor_name}</title>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+            body {
+              font-family: 'Outfit', sans-serif;
+              color: #1f2937;
+              margin: 0;
+              padding: 40px;
+              line-height: 1.5;
+            }
+            .header-table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 20px;
+            }
+            .logo-img {
+              height: 60px;
+              width: auto;
+            }
+            .divider {
+              border-top: 3px double #c3a64d;
+              margin: 20px 0;
+            }
+            .receipt-title {
+              font-size: 22px;
+              font-weight: 700;
+              text-align: center;
+              color: #c3a64d;
+              text-transform: uppercase;
+              margin-bottom: 30px;
+              letter-spacing: 1px;
+            }
+            .receipt-table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 30px;
+            }
+            .receipt-table td {
+              padding: 12px 10px;
+              font-size: 14px;
+              border-bottom: 1px solid #f3f4f6;
+            }
+            .label-cell {
+              color: #6b7280;
+              font-weight: 500;
+              width: 180px;
+            }
+            .value-cell {
+              font-weight: 600;
+              color: #1f2937;
+            }
+            .amount-box {
+              background-color: #f7f5ee;
+              border: 1px solid #c3a64d;
+              border-radius: 8px;
+              padding: 15px;
+              font-size: 18px;
+              font-weight: 700;
+              color: #c3a64d;
+              display: inline-block;
+              margin-top: 10px;
+            }
+            .signature-section {
+              margin-top: 50px;
+              width: 100%;
+              font-size: 14px;
+            }
+            @media print {
+              body {
+                padding: 20px;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <table class="header-table">
+            <tr>
+              <td>
+                <img class="logo-img" src="${logoUrl}" alt="Al-Mumtaz Logo" />
+              </td>
+              <td style="text-align: right; font-size: 12px; color: #6b7280; line-height: 1.4;">
+                <strong style="color: #c3a64d; font-size: 16px;">Rumah Qur'an Al-Mumtaz</strong><br />
+                Lembaga Pelatihan & Pembacaan Al-Quran E-Learning<br />
+                Email: info@almumtaz.sch.id | Web: fragrant-surf-ea74.awanio.workers.dev
+              </td>
+            </tr>
+          </table>
+
+          <div class="divider"></div>
+
+          <div class="receipt-title">Bukti Tanda Terima Mukafaah</div>
+
+          <table class="receipt-table">
+            <tr>
+              <td class="label-cell">Nomor Transaksi:</td>
+              <td class="value-cell" style="font-family: monospace; font-size: 13px;">${ts.id}</td>
+            </tr>
+            <tr>
+              <td class="label-cell">Telah Dibayarkan Kepada:</td>
+              <td class="value-cell" style="font-size: 16px; color: var(--primary);">${ts.tutor_name}</td>
+            </tr>
+            <tr>
+              <td class="label-cell">Untuk Pembayaran:</td>
+              <td class="value-cell">Penyaluran Mukafaah Kelas <strong>${ts.class_name}</strong> (Siswa: ${ts.student_name})</td>
+            </tr>
+            <tr>
+              <td class="label-cell">Tanggal Payout:</td>
+              <td class="value-cell">${currentDate}</td>
+            </tr>
+            <tr>
+              <td class="label-cell">Uang Sejumlah:</td>
+              <td class="value-cell" style="font-style: italic; font-weight: normal; color: #4b5563;">
+                "${amountWord} Rupiah"
+              </td>
+            </tr>
+          </table>
+
+          <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+              <div class="amount-box">
+                Jumlah: ${this.formatRupiah(ts.amount)}
+              </div>
+              <div style="font-size: 11px; color: #9ca3af; margin-top: 8px;">
+                *Dokumen ini merupakan bukti pembayaran mukafaah resmi yang sah dari Rumah Qur'an Al-Mumtaz.
+              </div>
+            </div>
+            
+            <table class="signature-section" style="width: 250px; margin-top: 0;">
+              <tr>
+                <td style="text-align: center;">
+                  <p style="margin-bottom: 60px; color: #4b5563;">Bendahara,<br /><strong>Rumah Qur'an Al-Mumtaz</strong></p>
+                  <strong style="text-decoration: underline; color: #1f2937;">${this.staff?.name || 'Mika Dwi Indah'}</strong><br />
+                  <span style="font-size: 12px; color: #6b7280; font-weight: 500;">Staff Administrasi</span>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <script>
+            window.onload = function() {
+              window.print();
+            }
+          </script>
+        </body>
+      </html>
+    `)
+    printWindow.document.close()
+  }
+
   // --- Router Tab dispatcher ---
   private renderActiveTab() {
     switch (this.currentTab) {
@@ -3600,6 +3774,10 @@ export class AlMumtazCrm extends LitElement {
       case 'payment-detail':
         modalTitle = 'Detail Transaksi Pembayaran'
         modalBody = this.renderPaymentDetails()
+        break
+      case 'tutor-share-detail':
+        modalTitle = 'Detail Transaksi Mukafaah'
+        modalBody = this.renderTutorShareDetails()
         break
       case 'user-add':
         modalTitle = 'Tambah Pengguna Baru'
@@ -4761,5 +4939,65 @@ export class AlMumtazCrm extends LitElement {
       </html>
     `)
     printWindow.document.close()
+  }
+
+  private renderTutorShareDetails() {
+    const ts = this.selectedTutorShare
+    if (!ts) return html``
+
+    const isPaid = ts.share_status === 'paid'
+
+    return html`
+      <div>
+        <div style="margin-bottom: 20px; border-bottom: 1px solid #f3f4f6; padding-bottom: 12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span class="badge ${isPaid ? 'badge-approved' : 'badge-pending'}">
+              ${isPaid ? 'Lunas (Paid)' : 'Belum (Unpaid)'}
+            </span>
+            <span style="font-size:12px; color:var(--text-muted);">${this.formatDate(ts.payment_date)}</span>
+          </div>
+          <h1 style="font-size:20px; margin-top:8px;">${ts.tutor_name}</h1>
+          <p style="font-size:13px; color:var(--text-muted); margin-top:2px;">
+            Penerima Mukafaah Pengajar
+          </p>
+        </div>
+
+        <!-- Breakdown Details -->
+        <div style="background-color:#f9fafb; border-radius:12px; padding:16px; margin-bottom:16px; font-size:13px; display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--text-muted);">Nama Kelas:</span>
+            <strong style="color:var(--text);">${ts.class_name}</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--text-muted);">Siswa (Peserta):</span>
+            <strong style="color:var(--text);">${ts.student_name}</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--text-muted);">Total Bayar Siswa:</span>
+            <strong style="color:var(--text);">${this.formatRupiah(ts.payment_amount)}</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; border-top:1px dashed #e5e7eb; padding-top:8px;">
+            <span style="font-weight:600; color:var(--text);">Mukafaah Pengajar (Net):</span>
+            <strong style="color:var(--primary); font-size:14px;">${this.formatRupiah(ts.amount)}</strong>
+          </div>
+        </div>
+
+        ${isPaid ? html`
+          <button class="btn btn-secondary" style="width:100%; margin-bottom:12px; display:flex; align-items:center; justify-content:center; gap:8px;" @click=${() => this.printTutorShareReceiptPDF(ts)}>
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+            Cetak Bukti Tanda Bayar (PDF)
+          </button>
+        ` : ''}
+
+        ${this.hasPermission('update') ? html`
+          <div class="card" style="padding:14px; border-color:#e5e7eb; margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px;">
+            <label class="input-label" style="margin:0;">Ubah Status Pembayaran</label>
+            <button class="btn ${isPaid ? 'btn-danger' : 'btn-primary'}" style="width: 100%; font-size: 13px;" @click=${() => { this.toggleTutorShareStatus(ts.id, ts.share_status); this.activeModal = null; }}>
+              ${isPaid ? 'Batalkan Pembayaran (Set Unpaid)' : 'Bayarkan Mukafaah (Set Paid)'}
+            </button>
+          </div>
+        ` : ''}
+      </div>
+    `;
   }
 }
