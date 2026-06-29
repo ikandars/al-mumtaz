@@ -3194,8 +3194,9 @@ export class AlMumtazCrm extends LitElement {
               </td>
               <td style="text-align: right; font-size: 12px; color: #6b7280; line-height: 1.4;">
                 <strong style="color: #c3a64d; font-size: 16px;">Rumah Qur'an Al-Mumtaz</strong><br />
-                Lembaga Pelatihan & Pembacaan Al-Quran E-Learning<br />
-                Email: info@almumtaz.sch.id | Web: fragrant-surf-ea74.awanio.workers.dev
+                Lembaga Pelatihan & Pembacaan Al-Quran<br />
+                Instagram: rumah_quran_al_mumtaz<br />
+                Alamat: Jl. Sadewa I No.19, RT.003/RW.022, Kayuringin Jaya, Kec. Bekasi
               </td>
             </tr>
           </table>
@@ -3383,8 +3384,9 @@ export class AlMumtazCrm extends LitElement {
               </td>
               <td style="text-align: right; font-size: 12px; color: #6b7280; line-height: 1.4;">
                 <strong style="color: #c3a64d; font-size: 16px;">Rumah Qur'an Al-Mumtaz</strong><br />
-                Lembaga Pelatihan & Pembacaan Al-Quran E-Learning<br />
-                Email: info@almumtaz.sch.id | Web: fragrant-surf-ea74.awanio.workers.dev
+                Lembaga Pelatihan & Pembacaan Al-Quran<br />
+                Instagram: rumah_quran_al_mumtaz<br />
+                Alamat: Jl. Sadewa I No.19, RT.003/RW.022, Kayuringin Jaya, Kec. Bekasi
               </td>
             </tr>
           </table>
@@ -3596,8 +3598,9 @@ export class AlMumtazCrm extends LitElement {
               </td>
               <td style="text-align: right; font-size: 12px; color: #6b7280; line-height: 1.4;">
                 <strong style="color: #c3a64d; font-size: 16px;">Rumah Qur'an Al-Mumtaz</strong><br />
-                Lembaga Pelatihan & Pembacaan Al-Quran E-Learning<br />
-                Email: info@almumtaz.sch.id | Web: fragrant-surf-ea74.awanio.workers.dev
+                Lembaga Pelatihan & Pembacaan Al-Quran<br />
+                Instagram: rumah_quran_al_mumtaz<br />
+                Alamat: Jl. Sadewa I No.19, RT.003/RW.022, Kayuringin Jaya, Kec. Bekasi
               </td>
             </tr>
           </table>
@@ -4812,8 +4815,9 @@ export class AlMumtazCrm extends LitElement {
               </td>
               <td style="text-align: right; font-size: 12px; color: #6b7280; line-height: 1.4;">
                 <strong style="color: #c3a64d; font-size: 16px;">Rumah Qur'an Al-Mumtaz</strong><br />
-                Lembaga Pelatihan & Pembacaan Al-Quran E-Learning<br />
-                Email: info@almumtaz.sch.id | Web: fragrant-surf-ea74.awanio.workers.dev
+                Lembaga Pelatihan & Pembacaan Al-Quran<br />
+                Instagram: rumah_quran_al_mumtaz<br />
+                Alamat: Jl. Sadewa I No.19, RT.003/RW.022, Kayuringin Jaya, Kec. Bekasi
               </td>
             </tr>
           </table>
