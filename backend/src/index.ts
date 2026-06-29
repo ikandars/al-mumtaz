@@ -871,12 +871,20 @@ app.post('/api/payments', checkPermission('create'), async (c) => {
   
   // Calculate fees
   let adminFee = 0
-  if (type === 'course' && classId) {
-    const cls = await db.prepare('SELECT has_admin_fee FROM classes WHERE id = ?').bind(classId).first() as any
-    if (!cls || cls.has_admin_fee !== 0) {
-      adminFee = await calculateAdminFee(db, amount)
-    }
+  const hasAdminFeeParam = formData.get('has_admin_fee')
+
+  let shouldApplyAdminFee = true
+  if (hasAdminFeeParam !== null) {
+    shouldApplyAdminFee = hasAdminFeeParam === '1'
   } else {
+    // Fallback: check class settings
+    if (type === 'course' && classId) {
+      const cls = await db.prepare('SELECT has_admin_fee FROM classes WHERE id = ?').bind(classId).first() as any
+      shouldApplyAdminFee = !cls || cls.has_admin_fee !== 0
+    }
+  }
+
+  if (shouldApplyAdminFee) {
     adminFee = await calculateAdminFee(db, amount)
   }
   const netAmount = Math.max(0, amount - adminFee)

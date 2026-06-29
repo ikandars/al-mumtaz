@@ -171,6 +171,7 @@ export class AlMumtazCrm extends LitElement {
   @state() private selectedStudentClasses: any[] = []
   @state() private loadingStudentClasses = false
   @state() private selectedPaymentStudentId = ''
+  @state() private paymentApplyAdminFee = true
 
   // Participant & Payment Search States
   @state() private participantSearchQuery = ''
@@ -1143,6 +1144,7 @@ export class AlMumtazCrm extends LitElement {
     this.selectedStudentClasses = []
     this.loadingStudentClasses = false
     this.selectedPaymentStudentId = ''
+    this.paymentApplyAdminFee = true
     this.participantSearchQuery = ''
     this.paymentSearchQuery = ''
     this.userSearchQuery = ''
@@ -1640,6 +1642,7 @@ export class AlMumtazCrm extends LitElement {
     formData.append('amount', amount)
     formData.append('payment_date', payment_date)
     formData.append('receiver_staff_id', receiver_staff_id)
+    formData.append('has_admin_fee', this.paymentApplyAdminFee ? '1' : '0')
     if (notes) formData.append('notes', notes)
     if (file) formData.append('attachment', file)
 
@@ -1663,6 +1666,7 @@ export class AlMumtazCrm extends LitElement {
     this.selectedStudentClasses = []
     this.selectedClassForPaymentId = ''
     this.selectedPaymentStudentId = studentId
+    this.updatePaymentAdminFeeDefault()
     
     if (!studentId) return
 
@@ -1675,6 +1679,15 @@ export class AlMumtazCrm extends LitElement {
       this.showToast('Gagal memuat daftar kelas siswa', 'error')
     } finally {
       this.loadingStudentClasses = false
+    }
+  }
+
+  private updatePaymentAdminFeeDefault() {
+    if (this.selectedPaymentType === 'course' && this.selectedClassForPaymentId) {
+      const cls = this.classes.find(c => c.id === this.selectedClassForPaymentId)
+      this.paymentApplyAdminFee = cls ? cls.has_admin_fee !== 0 : true
+    } else {
+      this.paymentApplyAdminFee = true
     }
   }
 
@@ -1744,11 +1757,8 @@ export class AlMumtazCrm extends LitElement {
   }
 
   private getLivePreviewFee() {
-    if (this.selectedPaymentType === 'course' && this.selectedClassForPaymentId) {
-      const cls = this.classes.find(c => c.id === this.selectedClassForPaymentId)
-      if (cls && cls.has_admin_fee === 0) {
-        return 0
-      }
+    if (!this.paymentApplyAdminFee) {
+      return 0
     }
     if (!this.adminFeeConfig.enabled || this.adminFeeConfig.tiers.length === 0) {
       return 0
@@ -1881,7 +1891,7 @@ export class AlMumtazCrm extends LitElement {
       <!-- Quick Action Buttons -->
       ${this.hasPermission('create') ? html`
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
-          <button class="btn btn-primary" @click=${() => { this.activeModal = 'payment-add'; this.liveAmount = 0; this.selectedStudentClasses = []; this.selectedPaymentStudentId = ''; this.selectedPaymentType = 'course'; }}>
+          <button class="btn btn-primary" @click=${() => { this.activeModal = 'payment-add'; this.liveAmount = 0; this.selectedStudentClasses = []; this.selectedPaymentStudentId = ''; this.selectedPaymentType = 'course'; this.paymentApplyAdminFee = true; }}>
             ${this.iconPlus()} Input Pembayaran
           </button>
           <button class="btn btn-secondary" @click=${() => this.activeModal = 'class-add'}>
@@ -2005,7 +2015,7 @@ export class AlMumtazCrm extends LitElement {
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
         <h3 style="font-size:14px; margin:0;">Transaksi Masuk (Iuran)</h3>
         ${this.hasPermission('create') ? html`
-          <button class="btn btn-primary" style="padding: 6px 12px; font-size: 11px;" @click=${() => { this.activeModal = 'payment-add'; this.liveAmount = 0; this.selectedStudentClasses = []; this.selectedPaymentStudentId = ''; this.selectedPaymentType = 'course'; }}>
+          <button class="btn btn-primary" style="padding: 6px 12px; font-size: 11px;" @click=${() => { this.activeModal = 'payment-add'; this.liveAmount = 0; this.selectedStudentClasses = []; this.selectedPaymentStudentId = ''; this.selectedPaymentType = 'course'; this.paymentApplyAdminFee = true; }}>
             ${this.iconPlus()} Input Pembayaran
           </button>
         ` : ''}
@@ -3514,7 +3524,7 @@ export class AlMumtazCrm extends LitElement {
 
         <div class="input-group">
           <label class="input-label" for="pay-type">Tipe Pembayaran</label>
-          <select class="input-field" id="pay-type" @change=${(e: any) => { this.selectedPaymentType = e.target.value; this.selectedClassForPaymentId = ''; }} required>
+          <select class="input-field" id="pay-type" @change=${(e: any) => { this.selectedPaymentType = e.target.value; this.selectedClassForPaymentId = ''; this.updatePaymentAdminFeeDefault(); }} required>
             <option value="course">Iuran Bulanan Kelas</option>
             <option value="exam">Ujian</option>
           </select>
@@ -3523,7 +3533,7 @@ export class AlMumtazCrm extends LitElement {
         ${this.selectedPaymentType === 'course' ? html`
           <div class="input-group">
             <label class="input-label" for="pay-class">Pilih Kelas</label>
-            <select class="input-field" id="pay-class" @change=${(e: any) => this.selectedClassForPaymentId = e.target.value} ?disabled=${this.loadingStudentClasses} required>
+            <select class="input-field" id="pay-class" @change=${(e: any) => { this.selectedClassForPaymentId = e.target.value; this.updatePaymentAdminFeeDefault(); }} ?disabled=${this.loadingStudentClasses} required>
               <option value="">${this.loadingStudentClasses ? '-- Memuat kelas siswa... --' : '-- Pilih Kelas --'}</option>
               ${this.selectedStudentClasses.map(c => html`
                 <option value=${c.id}>${c.name} (${this.formatRupiah(c.monthly_fee)})</option>
@@ -3565,6 +3575,11 @@ export class AlMumtazCrm extends LitElement {
               <option value=${u.staff_id} ?selected=${u.id === this.staff?.user_id}>${u.name}</option>
             `)}
           </select>
+        </div>
+
+        <div class="checkbox-group" style="margin-bottom:16px; margin-top:8px;">
+          <input type="checkbox" id="pay-admin-fee" .checked=${this.paymentApplyAdminFee} @change=${(e: any) => { this.paymentApplyAdminFee = e.target.checked; }} />
+          <label for="pay-admin-fee" style="font-size:13px; font-weight:600;">Terapkan Biaya Admin (Admin Fee)</label>
         </div>
 
         <!-- Calculations preview -->
