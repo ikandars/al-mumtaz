@@ -1524,18 +1524,18 @@ app.get('/api/reports/cashflow', async (c) => {
     ).bind(`${month}%`).all()
 
     const { results: mukafaahOutflows } = await db.prepare(
-      `SELECT ts.id, p.payment_date as expense_date, ts.amount, 
-              ('Mukafaah: ' || c.name || ' - ' || tu_user.name) as description,
+      `SELECT t.id as tutor_id, tu_user.name as tutor_name,
+              SUM(ts.amount) as amount,
+              ('Penyaluran Mukafaah - ' || tu_user.name) as description,
               'Sistem' as created_by_name,
-              tu_user.name as tutor_name,
-              c.name as class_name
+              MAX(p.payment_date) as expense_date
        FROM tutor_shares ts
        JOIN payments p ON ts.payment_id = p.id
-       JOIN classes c ON p.class_id = c.id
        JOIN tutors t ON ts.tutor_id = t.id
        JOIN users tu_user ON t.user_id = tu_user.id
        WHERE ts.status = 'paid' AND p.payment_date LIKE ?
-       ORDER BY p.payment_date ASC`
+       GROUP BY t.id, tu_user.name
+       ORDER BY tu_user.name ASC`
     ).bind(`${month}%`).all()
 
     const totalPaymentsInflow = inflows.reduce((sum: number, item: any) => sum + (item.amount || 0), 0)

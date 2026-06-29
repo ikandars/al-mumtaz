@@ -2989,7 +2989,7 @@ export class AlMumtazCrm extends LitElement {
                 <tr>
                   <td>${this.formatDate(item.expense_date)}</td>
                   <td style="font-weight:600; color:#5b21b6;">${item.tutor_name}</td>
-                  <td>Kelas: ${item.class_name}</td>
+                  <td>Penyaluran Mukafaah</td>
                   <td style="text-align:right; font-weight:700; color:#5b21b6;">-${this.formatRupiah(item.amount)}</td>
                 </tr>
               `)}
