@@ -2325,7 +2325,7 @@ export class AlMumtazCrm extends LitElement {
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
         <h2>Manajemen Pengguna</h2>
         ${this.hasPermission('create') ? html`
-          <button class="btn btn-primary" style="padding: 8px 12px; font-size: 12px;" @click=${() => this.activeModal = 'user-add'}>
+          <button class="btn btn-primary" style="padding: 8px 12px; font-size: 12px;" @click=${() => { this.selectedUser = null; this.isStaffSelected = false; this.activeModal = 'user-add'; }}>
             ${this.iconPlus()} Tambah User
           </button>
         ` : ''}
@@ -2368,7 +2368,7 @@ export class AlMumtazCrm extends LitElement {
             <!-- Actions -->
             <div style="margin-top:12px; display:flex; gap:8px; justify-content: flex-end;">
               ${this.hasPermission('update') ? html`
-                <button class="btn btn-secondary" style="padding: 6px; color: var(--primary);" @click=${() => { this.selectedUser = u; this.activeModal = 'user-edit'; }}>
+                <button class="btn btn-secondary" style="padding: 6px; color: var(--primary);" @click=${() => { this.selectedUser = u; this.isStaffSelected = u.is_staff; this.activeModal = 'user-edit'; }}>
                   ${this.iconEdit()}
                 </button>
               ` : ''}
@@ -3711,11 +3711,6 @@ export class AlMumtazCrm extends LitElement {
   private renderUserForm(isAdd: boolean) {
     const u = isAdd ? null : this.selectedUser
     
-    // Set internal conditional checking state on render/init
-    if (u && isAdd === false && this.selectedUser) {
-      this.isStaffSelected = this.selectedUser.is_staff
-    }
-
     return html`
       <form @submit=${this.handleUserSubmit}>
         <div class="input-group">
