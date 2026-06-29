@@ -1,10 +1,10 @@
 # Al-Mumtaz CRM
 
-A premium Customer Relationship Management (CRM) and Academic Management platform tailored for **Rumah Qur'an Al-Mumtaz** (an e-learning training and Quranic reading academy). This application helps administrators and staff track students, classes, exams, payments, financial cashflows, and tutor payouts seamlessly.
+Aplikasi Customer Relationship Management (CRM) dan Manajemen Akademik untuk **Rumah Qur'an Al-Mumtaz** (lembaga pelatihan dan pembelajaran membaca Al-Qur'an secara online). Aplikasi ini membantu administrator dan staf mengelola data siswa, kelas, ujian, pembayaran, arus kas keuangan, serta pembagian mukafaah pengajar.
 
 ---
 
-## 🚀 Fitur Utama (Key Features)
+## Fitur Utama
 
 - **Manajemen Siswa & Pengguna**: Profil lengkap siswa, keikutsertaan kelas, status iuran aktif/nonaktif, serta kelola akun staff & guru pengajar dengan hak akses tingkat (*Permissions*: Create, Update, Delete).
 - **Manajemen Kelas & Anggota**: Tambah/edit kelas dengan iuran bulanan kustom, penentuan guru pengajar (*Tutors*), pengelolaan pendaftaran anggota kelas, serta cek status iuran per bulan.
@@ -20,19 +20,19 @@ A premium Customer Relationship Management (CRM) and Academic Management platfor
   - **Laporan Arus Kas**: Pencatatan saldo kas awal, pemasukan (iuran & donasi), pengeluaran agensi (listrik, wifi, dll), serta saldo akhir bulanan yang otomatis dibawa ke saldo awal bulan berikutnya.
   - **Laporan Iuran Kelas**: Daftar rekapitulasi pembayaran iuran siswa per kelas per bulan.
   - **Laporan Mukafaah**: Akumulasi pembagian mukafaah per guru pengajar per bulan dengan fitur pembayaran (Disburse) instan.
-- **Keamanan & Desain Premium**:
+- **Keamanan & Antarmuka Pengguna**:
   - Tombol *Show/Hide Password* (ikon mata) interaktif pada form login.
-  - Antarmuka web responsif dan ramah seluler (*mobile-first*), dihiasi aksen warna *curated HSL*, Outfit typography, mikro-animasi hover, dan dukungan *Progressive Web App (PWA)*.
+  - Antarmuka web responsif dan ramah seluler (*mobile-first*), menggunakan skema warna HSL, Outfit typography, hover effects, dan dukungan Progressive Web App (PWA).
   - Notifikasi real-time instan menggunakan teknologi Server-Sent Events (SSE).
 
 ---
 
-## 🛠️ Teknologi yang Digunakan (Tech Stack)
+## Teknologi yang Digunakan
 
 ### Frontend
 - **Framework**: [Lit Element](https://lit.dev/) (Web Components, Reactive States, TypeScript)
 - **Bundler & Dev Server**: [Vite](https://vitejs.dev/)
-- **Design System**: Vanilla CSS dengan token variabel CSS kustom untuk responsivitas, mode premium, dan fleksibilitas penuh.
+- **Design System**: Vanilla CSS dengan variabel CSS kustom untuk responsivitas dan fleksibilitas.
 
 ### Backend
 - **Framework**: [Hono](https://hono.dev/) (Fast & Lightweight Web Framework)
@@ -43,9 +43,9 @@ A premium Customer Relationship Management (CRM) and Academic Management platfor
 
 ---
 
-## 💻 Panduan Menjalankan di Lokal (Local Setup Guide)
+## Panduan Menjalankan di Lokal
 
-### Prasyarat (Prerequisites)
+### Prasyarat
 - [Node.js](https://nodejs.org/) (versi 18+)
 - Cloudflare Wrangler CLI (terinstal otomatis via devDependencies)
 
@@ -86,7 +86,7 @@ A premium Customer Relationship Management (CRM) and Academic Management platfor
    npm run dev
    ```
    Vite akan mem-proxy semua request `/api` ke `http://localhost:8787`. Akses aplikasi di browser Anda di alamat:
-   👉 **`http://localhost:5173`**
+   **http://localhost:5173**
 
 ### Kredensial Login Admin (Bawaan Seed)
 - **Username**: `mika`
@@ -94,7 +94,7 @@ A premium Customer Relationship Management (CRM) and Academic Management platfor
 
 ---
 
-## 📦 Panduan Deployment (Cloudflare)
+## Panduan Deployment (Cloudflare)
 
 Untuk mendeploy aplikasi ke Cloudflare Workers produksi:
 
@@ -123,6 +123,6 @@ Untuk mendeploy aplikasi ke Cloudflare Workers produksi:
 
 ---
 
-## 📄 Lisensi (License)
+## Lisensi
 
 Proyek ini dilisensikan di bawah **MIT License**. Lihat berkas [LICENSE](LICENSE) untuk informasi lebih lanjut.
