@@ -14,10 +14,10 @@ Aplikasi Sistem Informasi Manajemen (SIM) Akademik dan Keuangan untuk **Rumah Qu
   - Pilihan auto-filter kelas berdasarkan siswa yang dipilih.
   - Opsi *Terapkan Biaya Admin* (dihitung dinamis menggunakan *tier* nominal) dengan default otomatis mengikuti pengaturan bawaan kelas, tetapi tetap dapat diubah secara manual.
   - Pengunggahan berkas bukti transfer (Gambar/PDF) ke Cloudflare R2 Object Storage.
-- **Kalkulasi & Pratinjau Nominal Real-time**: Kalkulasi dinamis untuk rincian Biaya Admin Agensi, Mukafaah Pengajar (bersih), serta pembagian porsi mukafaah antar pengajar secara real-time.
+- **Kalkulasi & Pratinjau Nominal Real-time**: Kalkulasi dinamis untuk rincian Biaya Admin Lembaga, Mukafaah Pengajar (bersih), serta pembagian porsi mukafaah antar pengajar secara real-time.
 - **Ekspor Bukti Tanda Bayar (PDF)**: Tombol cetak langsung kuitansi resmi dalam format PDF yang dilengkapi dengan Logo, UUID Transaksi, serta konversi angka nominal ke huruf terbilang bahasa Indonesia (contoh: Rp 150.000 menjadi *"Seratus Lima Puluh Ribu Rupiah"*).
 - **Laporan Keuangan & Pengajar**:
-  - **Laporan Arus Kas**: Pencatatan saldo kas awal, pemasukan (iuran & donasi), pengeluaran agensi (listrik, wifi, dll), serta saldo akhir bulanan yang otomatis dibawa ke saldo awal bulan berikutnya.
+  - **Laporan Arus Kas**: Pencatatan saldo kas awal, pemasukan (iuran & donasi), pengeluaran lembaga (listrik, wifi, dll), serta saldo akhir bulanan yang otomatis dibawa ke saldo awal bulan berikutnya.
   - **Laporan Iuran Kelas**: Daftar rekapitulasi pembayaran iuran siswa per kelas per bulan.
   - **Laporan Mukafaah**: Akumulasi pembagian mukafaah per guru pengajar per bulan dengan fitur pembayaran (Disburse) instan.
 - **Keamanan & Antarmuka Pengguna**:

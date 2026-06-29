@@ -3983,7 +3983,7 @@ export class AlMumtazCrm extends LitElement {
         ${this.liveAmount > 0 ? html`
           <div class="preview-box">
             <div class="preview-row">
-              <span>Biaya Admin Agensi:</span>
+              <span>Biaya Admin Lembaga:</span>
               <span>${this.adminFeeConfig.enabled ? this.formatRupiah(this.getLivePreviewFee()) : 'Rp 0 (Nonaktif)'}</span>
             </div>
             <div class="preview-row">
@@ -4218,7 +4218,7 @@ export class AlMumtazCrm extends LitElement {
           <div class="checkbox-group">
             <input type="checkbox" id="user-is-staff" .checked=${u?.is_staff || false} 
                    @change=${(e: any) => this.isStaffSelected = e.target.checked} />
-            <label for="user-is-staff" style="font-size:13px; font-weight:600;">Staff Agensi (Bisa Login)</label>
+            <label for="user-is-staff" style="font-size:13px; font-weight:600;">Staff Lembaga (Bisa Login)</label>
           </div>
         </div>
 
