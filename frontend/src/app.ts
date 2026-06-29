@@ -2176,7 +2176,7 @@ export class AlMumtazCrm extends LitElement {
     return html`
       <div class="tab-header">
         <button class="tab-btn ${this.subClassTab === 'classes' ? 'tab-btn-active' : ''}" @click=${() => this.subClassTab = 'classes'}>Daftar Kelas</button>
-        <button class="tab-btn ${this.subClassTab === 'exams' ? 'tab-btn-active' : ''}" @click=${() => this.subClassTab = 'exams'}>Ujian Insidental</button>
+        <button class="tab-btn ${this.subClassTab === 'exams' ? 'tab-btn-active' : ''}" @click=${() => this.subClassTab = 'exams'}>Ujian</button>
       </div>
 
       ${this.subClassTab === 'classes' ? this.renderClassesList() : this.renderExamsList()}
@@ -2261,7 +2261,7 @@ export class AlMumtazCrm extends LitElement {
   private renderExamsList() {
     return html`
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h2>Event Ujian Insidental</h2>
+        <h2>Event Ujian</h2>
         ${this.hasPermission('create') ? html`
           <button class="btn btn-primary" style="padding: 8px 12px; font-size: 12px;" @click=${() => this.activeModal = 'exam-add'}>
             ${this.iconPlus()} Jadwal Ujian
@@ -3370,7 +3370,7 @@ export class AlMumtazCrm extends LitElement {
         modalBody = this.renderClassMembersList()
         break
       case 'exam-add':
-        modalTitle = 'Jadwal Ujian Insidental'
+        modalTitle = 'Jadwal Ujian'
         modalBody = this.renderExamForm(true)
         break
       case 'exam-edit':
@@ -3490,7 +3490,7 @@ export class AlMumtazCrm extends LitElement {
           <label class="input-label" for="pay-type">Tipe Pembayaran</label>
           <select class="input-field" id="pay-type" @change=${(e: any) => { this.selectedPaymentType = e.target.value; this.selectedClassForPaymentId = ''; }} required>
             <option value="course">Iuran Bulanan Kelas</option>
-            <option value="exam">Ujian Insidental</option>
+            <option value="exam">Ujian</option>
           </select>
         </div>
 
