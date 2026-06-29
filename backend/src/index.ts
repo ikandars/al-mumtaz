@@ -1479,7 +1479,9 @@ app.get('/api/reports/cashflow', async (c) => {
     const { results: mukafaahOutflows } = await db.prepare(
       `SELECT ts.id, p.payment_date as expense_date, ts.amount, 
               ('Mukafaah: ' || c.name || ' - ' || tu_user.name) as description,
-              'Sistem' as created_by_name
+              'Sistem' as created_by_name,
+              tu_user.name as tutor_name,
+              c.name as class_name
        FROM tutor_shares ts
        JOIN payments p ON ts.payment_id = p.id
        JOIN classes c ON p.class_id = c.id

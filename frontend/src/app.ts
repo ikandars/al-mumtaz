@@ -165,6 +165,7 @@ export class AlMumtazCrm extends LitElement {
   @state() private cashflowReportData: any = null
   @state() private selectedReportTutorId = ''
   @state() private selectedReportShareStatus = ''
+  @state() private selectedReportTutorMonth = ''
 
   // Participant & Payment Search States
   @state() private participantSearchQuery = ''
@@ -1125,6 +1126,7 @@ export class AlMumtazCrm extends LitElement {
     this.selectedReportClassId = ''
     this.selectedReportTutorId = ''
     this.selectedReportShareStatus = ''
+    this.selectedReportTutorMonth = ''
     this.participantSearchQuery = ''
     this.paymentSearchQuery = ''
     this.userSearchQuery = ''
@@ -2679,21 +2681,25 @@ export class AlMumtazCrm extends LitElement {
       <div class="card" style="margin-bottom:16px;">
         <h3 style="font-size:14px; margin-bottom:10px;">Filter Daftar Transaksi Mukafaah</h3>
         <div class="form-grid">
-          <div class="form-row">
-            <div class="input-group">
+          <div class="form-row" style="flex-wrap: wrap; gap: 12px;">
+            <div class="input-group" style="flex: 1; min-width: 120px;">
               <label class="input-label">Filter Pengajar</label>
               <select class="input-field" .value=${this.selectedReportTutorId} @change=${(e: any) => { this.selectedReportTutorId = e.target.value; this.loadTutorSharesReport(); }}>
                 <option value="">Semua Pengajar</option>
                 ${this.tutors.map(t => html`<option value=${t.id}>${t.name}</option>`)}
               </select>
             </div>
-            <div class="input-group">
+            <div class="input-group" style="flex: 1; min-width: 120px;">
               <label class="input-label">Filter Status</label>
               <select class="input-field" .value=${this.selectedReportShareStatus} @change=${(e: any) => { this.selectedReportShareStatus = e.target.value; this.loadTutorSharesReport(); }}>
                 <option value="">Semua Status</option>
                 <option value="unpaid">Belum Dibayar (Unpaid)</option>
                 <option value="paid">Sudah Dibayar (Paid)</option>
               </select>
+            </div>
+            <div class="input-group" style="flex: 1; min-width: 120px;">
+              <label class="input-label">Filter Bulan</label>
+              <input class="input-field" type="month" .value=${this.selectedReportTutorMonth} @input=${(e: any) => { this.selectedReportTutorMonth = e.target.value; this.loadTutorSharesReport(); }} />
             </div>
           </div>
         </div>
@@ -2919,8 +2925,8 @@ export class AlMumtazCrm extends LitElement {
             <thead>
               <tr>
                 <th>Tanggal</th>
+                <th>Nama Pengajar</th>
                 <th>Keterangan</th>
-                <th>Pencatat</th>
                 <th style="text-align:right;">Nominal</th>
               </tr>
             </thead>
@@ -2932,8 +2938,8 @@ export class AlMumtazCrm extends LitElement {
               ` : r.mukafaah_outflows.map((item: any) => html`
                 <tr>
                   <td>${this.formatDate(item.expense_date)}</td>
-                  <td style="font-weight:600; color:#5b21b6;">${item.description}</td>
-                  <td>${item.created_by_name || 'Sistem'}</td>
+                  <td style="font-weight:600; color:#5b21b6;">${item.tutor_name}</td>
+                  <td>Kelas: ${item.class_name}</td>
                   <td style="text-align:right; font-weight:700; color:#5b21b6;">-${this.formatRupiah(item.amount)}</td>
                 </tr>
               `)}
@@ -3185,7 +3191,7 @@ export class AlMumtazCrm extends LitElement {
       const params = []
       if (this.selectedReportTutorId) params.push(`tutor_id=${this.selectedReportTutorId}`)
       if (this.selectedReportShareStatus) params.push(`status=${this.selectedReportShareStatus}`)
-      if (this.selectedReportMonth && this.selectedReportClassId !== '') params.push(`month=${this.selectedReportMonth}`)
+      if (this.selectedReportTutorMonth) params.push(`month=${this.selectedReportTutorMonth}`)
       if (params.length > 0) url += `?${params.join('&')}`
 
       const data = await this.fetchApi(url)
