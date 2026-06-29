@@ -53,8 +53,8 @@ Aplikasi Sistem Informasi Manajemen (SIM) Akademik dan Keuangan untuk **Rumah Qu
 
 1. **Kloning Repositori**:
    ```bash
-   git clone git@github.com:ikandars/crm-rq-al-mumtaz.git
-   cd crm-rq-al-mumtaz
+   git clone git@github.com:ikandars/al-mumtaz.git
+   cd al-mumtaz
    ```
 
 2. **Inisialisasi Database Lokal & Seeding**:
