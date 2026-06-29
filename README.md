@@ -1,6 +1,6 @@
 # Al-Mumtaz CRM
 
-Aplikasi Customer Relationship Management (CRM) dan Manajemen Akademik untuk **Rumah Qur'an Al-Mumtaz** (lembaga pelatihan dan pembelajaran membaca Al-Qur'an secara online). Aplikasi ini membantu administrator dan staf mengelola data siswa, kelas, ujian, pembayaran, arus kas keuangan, serta pembagian mukafaah pengajar.
+Aplikasi Customer Relationship Management (CRM) dan Manajemen Akademik untuk **Rumah Qur'an Al-Mumtaz** (lembaga pelatihan dan pembelajaran membaca Al-Qur'an). Aplikasi ini bersifat open-source dan dirancang agar dapat digunakan secara gratis oleh lembaga Rumah Qur'an lainnya, baik untuk penggunaan secara online maupun offline (lokal). Sistem ini membantu administrator dan staf mengelola data siswa, kelas, ujian, pembayaran, arus kas keuangan, serta pembagian mukafaah pengajar.
 
 ---
 
