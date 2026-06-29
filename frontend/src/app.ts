@@ -1354,7 +1354,7 @@ export class AlMumtazCrm extends LitElement {
       this.notificationPermission = permission
       if (permission === 'granted') {
         this.showToast('Notifikasi Web berhasil diaktifkan!', 'success')
-        new Notification('CRM Al-Mumtaz', {
+        new Notification("SIM Rumah Qur'an Al-Mumtaz", {
           body: 'Notifikasi berhasil diaktifkan.',
           icon: '/icon.svg'
         })
@@ -3517,7 +3517,7 @@ export class AlMumtazCrm extends LitElement {
       <div class="login-container">
         <div class="login-header">
           <img class="login-logo" src="/logo.jpg" alt="Al-Mumtaz Logo" />
-          <h1 style="display: none;">CRM Al-Mumtaz</h1>
+          <h1 style="display: none;">SIM Rumah Qur'an Al-Mumtaz</h1>
           <p>Portal Khusus Staff & Administrasi</p>
         </div>
 
