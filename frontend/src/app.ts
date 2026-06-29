@@ -3505,7 +3505,6 @@ export class AlMumtazCrm extends LitElement {
         <tr>
           <td style="text-align: center;">${index + 1}</td>
           <td>${d.class_name}</td>
-          <td>${d.student_name}</td>
           <td style="text-align: center;">${this.formatDate(d.payment_date)}</td>
           <td style="text-align: right; font-weight: 600;">${this.formatRupiah(d.amount)}</td>
         </tr>
@@ -3645,7 +3644,6 @@ export class AlMumtazCrm extends LitElement {
               <tr>
                 <th style="width: 40px; text-align: center;">No</th>
                 <th>Nama Kelas</th>
-                <th>Siswa</th>
                 <th style="width: 130px; text-align: center;">Tanggal Iuran</th>
                 <th style="width: 150px; text-align: right;">Mukafaah</th>
               </tr>
@@ -3653,7 +3651,7 @@ export class AlMumtazCrm extends LitElement {
             <tbody>
               ${rowsHtml}
               <tr>
-                <td colspan="4" style="text-align: right; font-weight: 700;">Total Mukafaah Dibayarkan:</td>
+                <td colspan="3" style="text-align: right; font-weight: 700;">Total Mukafaah Dibayarkan:</td>
                 <td style="text-align: right; font-weight: 700; color: #c3a64d; font-size: 14px;">${this.formatRupiah(summary.total_paid)}</td>
               </tr>
             </tbody>
@@ -5036,8 +5034,7 @@ export class AlMumtazCrm extends LitElement {
                   </span>
                 </div>
                 <div style="display:flex; justify-content:space-between; color:var(--text-muted);">
-                  <span>Siswa: ${d.student_name}</span>
-                  <span>Tgl: ${this.formatDate(d.payment_date)}</span>
+                  <span>Tgl Iuran: ${this.formatDate(d.payment_date)}</span>
                 </div>
                 <div style="display:flex; justify-content:space-between; border-top:1px dotted #f3f4f6; padding-top:4px; margin-top:2px;">
                   <span>Pembayaran: ${this.formatRupiah(d.payment_amount)}</span>
