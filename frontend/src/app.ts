@@ -3254,6 +3254,200 @@ export class AlMumtazCrm extends LitElement {
     printWindow.document.close()
   }
 
+  private terbilangRupiah(n: number): string {
+    const units = ['', 'Satu', 'Dua', 'Tiga', 'Empat', 'Lima', 'Enam', 'Tujuh', 'Delapan', 'Sembilan', 'Sepuluh', 'Sebelas']
+    
+    if (n === 0) return 'Nol'
+    
+    let result = ''
+    
+    if (n < 12) {
+      result = units[n]
+    } else if (n < 20) {
+      result = this.terbilangRupiah(n - 10) + ' Belas'
+    } else if (n < 100) {
+      result = this.terbilangRupiah(Math.floor(n / 10)) + ' Puluh ' + this.terbilangRupiah(n % 10)
+    } else if (n < 200) {
+      result = 'Seratus ' + this.terbilangRupiah(n - 100)
+    } else if (n < 1000) {
+      result = this.terbilangRupiah(Math.floor(n / 100)) + ' Ratus ' + this.terbilangRupiah(n % 100)
+    } else if (n < 2000) {
+      result = 'Seribu ' + this.terbilangRupiah(n - 1000)
+    } else if (n < 1000000) {
+      result = this.terbilangRupiah(Math.floor(n / 1000)) + ' Ribu ' + this.terbilangRupiah(n % 1000)
+    } else if (n < 1000000000) {
+      result = this.terbilangRupiah(Math.floor(n / 1000000)) + ' Juta ' + this.terbilangRupiah(n % 1000000)
+    } else if (n < 1000000000000) {
+      result = this.terbilangRupiah(Math.floor(n / 1000000000)) + ' Miliar ' + this.terbilangRupiah(n % 1000000000)
+    }
+    
+    return result.replace(/\s+/g, ' ').trim()
+  }
+
+  private printReceiptPDF(p: any) {
+    const printWindow = window.open('', '_blank', 'width=900,height=800')
+    if (!printWindow) {
+      this.showToast('Gagal membuka jendela cetak. Pastikan pop-up diizinkan.', 'error')
+      return
+    }
+
+    const logoUrl = window.location.origin + '/logo.jpg'
+    const amountWord = this.terbilangRupiah(p.amount)
+    const typeLabel = p.type === 'course' ? 'Iuran Bulanan Kelas' : 'Pendaftaran Ujian'
+    const itemLabel = p.type === 'course' ? p.class_name : p.exam_name
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Bukti Tanda Bayar - ${p.participant_name}</title>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+            body {
+              font-family: 'Outfit', sans-serif;
+              color: #1f2937;
+              margin: 0;
+              padding: 40px;
+              line-height: 1.5;
+            }
+            .header-table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 20px;
+            }
+            .logo-img {
+              height: 60px;
+              width: auto;
+            }
+            .divider {
+              border-top: 3px double #c3a64d;
+              margin: 20px 0;
+            }
+            .receipt-title {
+              font-size: 22px;
+              font-weight: 700;
+              text-align: center;
+              color: #c3a64d;
+              text-transform: uppercase;
+              margin-bottom: 30px;
+              letter-spacing: 1px;
+            }
+            .receipt-table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 30px;
+            }
+            .receipt-table td {
+              padding: 12px 10px;
+              font-size: 14px;
+              border-bottom: 1px solid #f3f4f6;
+            }
+            .label-cell {
+              color: #6b7280;
+              font-weight: 500;
+              width: 180px;
+            }
+            .value-cell {
+              font-weight: 600;
+              color: #1f2937;
+            }
+            .amount-box {
+              background-color: #f7f5ee;
+              border: 1px solid #c3a64d;
+              border-radius: 8px;
+              padding: 15px;
+              font-size: 18px;
+              font-weight: 700;
+              color: #c3a64d;
+              display: inline-block;
+              margin-top: 10px;
+            }
+            .signature-section {
+              margin-top: 50px;
+              width: 100%;
+              font-size: 14px;
+            }
+            @media print {
+              body {
+                padding: 20px;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <table class="header-table">
+            <tr>
+              <td>
+                <img class="logo-img" src="${logoUrl}" alt="Al-Mumtaz Logo" />
+              </td>
+              <td style="text-align: right; font-size: 12px; color: #6b7280; line-height: 1.4;">
+                <strong style="color: #c3a64d; font-size: 16px;">Rumah Qur'an Al-Mumtaz</strong><br />
+                Lembaga Pelatihan & Pembacaan Al-Quran E-Learning<br />
+                Email: info@almumtaz.sch.id | Web: fragrant-surf-ea74.awanio.workers.dev
+              </td>
+            </tr>
+          </table>
+
+          <div class="divider"></div>
+
+          <div class="receipt-title">Bukti Tanda Bayar (Kuitansi)</div>
+
+          <table class="receipt-table">
+            <tr>
+              <td class="label-cell">Nomor Transaksi:</td>
+              <td class="value-cell" style="font-family: monospace; font-size: 13px;">${p.id}</td>
+            </tr>
+            <tr>
+              <td class="label-cell">Telah Diterima Dari:</td>
+              <td class="value-cell" style="font-size: 16px; color: var(--primary);">${p.participant_name}</td>
+            </tr>
+            <tr>
+              <td class="label-cell">Untuk Pembayaran:</td>
+              <td class="value-cell">${typeLabel} - <strong>${itemLabel}</strong></td>
+            </tr>
+            <tr>
+              <td class="label-cell">Tanggal Bayar:</td>
+              <td class="value-cell">${this.formatDate(p.payment_date)}</td>
+            </tr>
+            <tr>
+              <td class="label-cell">Uang Sejumlah:</td>
+              <td class="value-cell" style="font-style: italic; font-weight: normal; color: #4b5563;">
+                "${amountWord} Rupiah"
+              </td>
+            </tr>
+          </table>
+
+          <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+              <div class="amount-box">
+                Jumlah: ${this.formatRupiah(p.amount)}
+              </div>
+              <div style="font-size: 11px; color: #9ca3af; margin-top: 8px;">
+                *Pembayaran ini telah diverifikasi sistem dan dinyatakan sah sebagai tanda bukti pembayaran.
+              </div>
+            </div>
+            
+            <table class="signature-section" style="width: 250px; margin-top: 0;">
+              <tr>
+                <td style="text-align: center;">
+                  <p style="margin-bottom: 60px; color: #4b5563;">Penerima,<br /><strong>Rumah Qur'an Al-Mumtaz</strong></p>
+                  <strong style="text-decoration: underline; color: #1f2937;">${p.receiver_name || this.staff?.name || 'Mika Dwi Indah'}</strong><br />
+                  <span style="font-size: 12px; color: #6b7280; font-weight: 500;">Staff Administrasi</span>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <script>
+            window.onload = function() {
+              window.print();
+            }
+          </script>
+        </body>
+      </html>
+    `)
+    printWindow.document.close()
+  }
+
   private async loadTutorSharesReport() {
     this.loading = true
     try {
@@ -3784,6 +3978,13 @@ export class AlMumtazCrm extends LitElement {
               </button>
             </div>
           </div>
+        ` : ''}
+
+        ${p.status === 'approved' ? html`
+          <button class="btn btn-secondary" style="width:100%; margin-bottom:12px; display:flex; align-items:center; justify-content:center; gap:8px;" @click=${() => this.printReceiptPDF(p)}>
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+            Cetak Bukti Tanda Bayar (PDF)
+          </button>
         ` : ''}
 
         <!-- Delete options -->
