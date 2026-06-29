@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f5f7fa" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d4af37" />
+      <stop offset="50%" stop-color="#f9e076" />
+      <stop offset="100%" stop-color="#aa7c11" />
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f9b0f" />
+      <stop offset="100%" stop-color="#054505" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#000000" flood-opacity="0.1" />
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)" />
+  <circle cx="256" cy="256" r="210" fill="none" stroke="url(#goldGrad)" stroke-width="8" opacity="0.4" />
+  
+  <!-- Stylized Icon Group -->
+  <g filter="url(#shadow)" transform="translate(128, 120)">
+    <!-- Quran Book Stand (Rehal) -->
+    <path d="M40,180 L128,140 L216,180" fill="none" stroke="url(#goldGrad)" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M60,180 L40,240 C40,250 50,260 60,260 L80,260 L128,190" fill="none" stroke="url(#goldGrad)" stroke-width="12" stroke-linecap="round" />
+    <path d="M196,180 L216,240 C216,250 206,260 196,260 L176,260 L128,190" fill="none" stroke="url(#goldGrad)" stroke-width="12" stroke-linecap="round" />
+
+    <!-- Open Quran Pages -->
+    <!-- Left Page -->
+    <path d="M128,135 C90,95 40,95 20,110 L20,175 C40,160 90,160 128,195 Z" fill="url(#emeraldGrad)" />
+    <!-- Right Page -->
+    <path d="M128,135 C166,95 216,95 236,110 L236,175 C216,160 166,160 128,195 Z" fill="url(#emeraldGrad)" />
+    
+    <!-- Inner lines representing writing -->
+    <path d="M40,125 C60,120 90,123 110,135 M40,140 C60,135 90,138 110,150" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity="0.8" />
+    <path d="M216,125 C196,120 166,123 146,135 M216,140 C196,135 166,138 146,150" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity="0.8" />
+
+    <!-- Crescent Moon behind the book -->
+    <path d="M128,15 C90,15 58,42 58,75 C58,95 72,110 88,110 C80,95 76,82 76,70 C76,46 100,28 128,28 C156,28 180,46 180,70 C180,82 176,95 168,110 C184,110 198,95 198,75 C198,42 166,15 128,15 Z" fill="url(#goldGrad)" transform="translate(0, -60)" />
+    
+    <!-- Star on top -->
+    <polygon points="128,5 132,15 142,15 134,21 137,31 128,25 119,31 122,21 114,15 124,15" fill="url(#goldGrad)" transform="translate(0, -70)" />
+  </g>
+</svg>

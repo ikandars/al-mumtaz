@@ -1,0 +1,353 @@
+:root {
+  --primary: #c3a64d; /* Al-Mumtaz Gold */
+  --primary-light: #f7f5ee; /* Cream */
+  --primary-hover: #b2943c; /* Darker Gold */
+  --secondary: #8ba296; /* Sage Green */
+  --secondary-light: #f2f5f4; /* Light Sage Green */
+  --secondary-hover: #7b9286; /* Darker Sage Green */
+  --background: #ffffff;
+  --bg-subtle: #f9fafb;
+  --text: #1f2937;
+  --text-muted: #6b7280;
+  --border: #f3f4f6;
+  --border-dark: #e5e7eb;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+  --shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+  --radius: 12px;
+  --radius-lg: 16px;
+  --radius-sm: 8px;
+  --font: 'Outfit', sans-serif;
+  --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Status Colors */
+  --status-pending: #d97706; /* Darker Amber for contrast */
+  --status-pending-bg: #fffbeb;
+  --status-approved: #8ba296; /* Sage Green */
+  --status-approved-bg: #f2f5f4;
+  --status-rejected: #ef4444; /* Red */
+  --status-rejected-bg: #fef2f2;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font);
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-color: #f3f4f6;
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-x: hidden;
+}
+
+/* Constrain CRM app in a center mobile view on desktop */
+#app-root {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100vh;
+  background-color: var(--background);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.05);
+}
+
+/* Typography */
+h1 { font-size: 24px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
+h2 { font-size: 20px; font-weight: 600; color: var(--text); letter-spacing: -0.3px; }
+h3 { font-size: 16px; font-weight: 600; color: var(--text); }
+h4 { font-size: 14px; font-weight: 600; color: var(--text-muted); }
+p { font-size: 14px; color: var(--text-muted); line-height: 1.5; }
+
+/* Premium Form Styling */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  width: 100%;
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.form-row .input-group {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.input-group {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.input-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.input-field {
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-dark);
+  font-size: 14px;
+  background-color: var(--bg-subtle);
+  transition: var(--transition);
+  width: 100%;
+  color: var(--text);
+  appearance: none; /* Reset standard browser styling */
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--primary);
+  background-color: white;
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+/* Dropdown styling */
+select.input-field {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 14px;
+  padding-right: 36px;
+}
+
+/* Textarea custom style */
+textarea.input-field {
+  resize: none;
+}
+
+/* Checkbox Kustom Premium */
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding-left: 28px;
+  cursor: pointer;
+  font-size: 14px;
+  user-select: none;
+  color: var(--text);
+  min-height: 20px;
+  line-height: 20px;
+}
+
+.checkbox-container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 20px;
+  width: 20px;
+  background-color: var(--bg-subtle);
+  border: 1.5px solid var(--border-dark);
+  border-radius: 6px;
+  transition: var(--transition);
+}
+
+.checkbox-container:hover input ~ .checkmark {
+  background-color: #f3f4f6;
+}
+
+.checkbox-container input:checked ~ .checkmark {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.checkbox-container input:checked ~ .checkmark:after {
+  display: block;
+}
+
+.checkbox-container .checkmark:after {
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 18px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+  gap: 8px;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: white;
+  box-shadow: 0 4px 10px rgba(5, 150, 105, 0.15);
+}
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+.btn-primary:active {
+  transform: scale(0.97);
+}
+
+.btn-secondary {
+  background-color: var(--background);
+  color: var(--text);
+  border: 1px solid var(--border-dark);
+}
+.btn-secondary:hover {
+  background-color: var(--bg-subtle);
+}
+.btn-secondary:active {
+  transform: scale(0.97);
+}
+
+.btn-danger {
+  background-color: var(--status-rejected-bg);
+  color: var(--status-rejected);
+  border: 1px solid transparent;
+}
+.btn-danger:hover {
+  background-color: #fee2e2;
+}
+.btn-danger:active {
+  transform: scale(0.97);
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-pending {
+  background-color: var(--status-pending-bg);
+  color: var(--status-pending);
+}
+
+.badge-approved {
+  background-color: var(--status-approved-bg);
+  color: var(--status-approved);
+}
+
+.badge-rejected {
+  background-color: var(--status-rejected-bg);
+  color: var(--status-rejected);
+}
+
+/* Cards */
+.card {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+  transition: var(--transition);
+}
+
+/* Report Table Styling */
+.report-container {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+  background: white;
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+
+.report-table th {
+  background-color: var(--bg-subtle);
+  padding: 12px 14px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border-dark);
+}
+
+.report-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  vertical-align: middle;
+}
+
+.report-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Preview Box (untuk biaya admin & bagi hasil) */
+.preview-box {
+  background-color: var(--primary-light);
+  border: 1.5px dashed var(--primary);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.preview-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary-hover);
+}
+
+.preview-row:last-child {
+  border-top: 1px solid rgba(5, 150, 105, 0.2);
+  padding-top: 6px;
+  font-size: 14px;
+  font-weight: 700;
+}

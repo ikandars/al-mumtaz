@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "fragrant-surf-ea74",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-06-28",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "assets": {
+    "directory": "../frontend/dist"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "al-mumtaz-crm-db",
+      "database_id": "eb09b120-c020-49b7-83e5-8bbfac02028f"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "OBJECT_STORAGE",
+      "bucket_name": "al-mumtaz"
+    }
+  ]
+}

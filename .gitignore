@@ -1,0 +1,15 @@
+# System / OS
+.DS_Store
+Thumbs.db
+*.log
+
+# Dependencies
+node_modules/
+
+# Local build / state directories
+backend/.wrangler/
+frontend/dist/
+
+# Generated seeds / temporary caches
+backend/generated_seed.sql
+backend/new_seed.sql
