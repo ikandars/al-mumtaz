@@ -168,6 +168,9 @@ export class AlMumtazCrm extends LitElement {
   @state() private selectedReportTutorMonth = ''
   @state() private showLoginPassword = false
   @state() private submitting = false
+  @state() private selectedStudentClasses: any[] = []
+  @state() private loadingStudentClasses = false
+  @state() private selectedPaymentStudentId = ''
 
   // Participant & Payment Search States
   @state() private participantSearchQuery = ''
@@ -1137,6 +1140,9 @@ export class AlMumtazCrm extends LitElement {
     this.selectedReportTutorMonth = ''
     this.showLoginPassword = false
     this.submitting = false
+    this.selectedStudentClasses = []
+    this.loadingStudentClasses = false
+    this.selectedPaymentStudentId = ''
     this.participantSearchQuery = ''
     this.paymentSearchQuery = ''
     this.userSearchQuery = ''
@@ -1652,6 +1658,26 @@ export class AlMumtazCrm extends LitElement {
     }
   }
 
+  private async handlePaymentStudentChange(e: Event) {
+    const studentId = (e.target as HTMLSelectElement).value
+    this.selectedStudentClasses = []
+    this.selectedClassForPaymentId = ''
+    this.selectedPaymentStudentId = studentId
+    
+    if (!studentId) return
+
+    this.loadingStudentClasses = true
+    try {
+      const details = await this.fetchApi(`/api/participants/${studentId}/details`)
+      const enrolledClassIds = (details.classes || []).map((c: any) => c.class_id)
+      this.selectedStudentClasses = this.classes.filter(c => enrolledClassIds.includes(c.id) && c.status === 'active')
+    } catch(err) {
+      this.showToast('Gagal memuat daftar kelas siswa', 'error')
+    } finally {
+      this.loadingStudentClasses = false
+    }
+  }
+
   // Update Payment Status (Approve/Reject)
   private async handleVerifyPayment(status: 'approved' | 'rejected') {
     const notesInput = this.shadowRoot?.querySelector('#verify-notes') as HTMLTextAreaElement
@@ -1855,7 +1881,7 @@ export class AlMumtazCrm extends LitElement {
       <!-- Quick Action Buttons -->
       ${this.hasPermission('create') ? html`
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
-          <button class="btn btn-primary" @click=${() => { this.activeModal = 'payment-add'; this.liveAmount = 0; }}>
+          <button class="btn btn-primary" @click=${() => { this.activeModal = 'payment-add'; this.liveAmount = 0; this.selectedStudentClasses = []; this.selectedPaymentStudentId = ''; this.selectedPaymentType = 'course'; }}>
             ${this.iconPlus()} Input Pembayaran
           </button>
           <button class="btn btn-secondary" @click=${() => this.activeModal = 'class-add'}>
@@ -1979,7 +2005,7 @@ export class AlMumtazCrm extends LitElement {
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
         <h3 style="font-size:14px; margin:0;">Transaksi Masuk (Iuran)</h3>
         ${this.hasPermission('create') ? html`
-          <button class="btn btn-primary" style="padding: 6px 12px; font-size: 11px;" @click=${() => { this.activeModal = 'payment-add'; this.liveAmount = 0; }}>
+          <button class="btn btn-primary" style="padding: 6px 12px; font-size: 11px;" @click=${() => { this.activeModal = 'payment-add'; this.liveAmount = 0; this.selectedStudentClasses = []; this.selectedPaymentStudentId = ''; this.selectedPaymentType = 'course'; }}>
             ${this.iconPlus()} Input Pembayaran
           </button>
         ` : ''}
@@ -3480,7 +3506,7 @@ export class AlMumtazCrm extends LitElement {
       <form @submit=${this.handlePaymentSubmit}>
         <div class="input-group">
           <label class="input-label" for="pay-student">Siswa (Peserta) <span style="color:red;">*</span></label>
-          <select class="input-field" id="pay-student" required>
+          <select class="input-field" id="pay-student" @change=${this.handlePaymentStudentChange} required>
             <option value="">-- Pilih Siswa --</option>
             ${this.participants.map(s => html`<option value=${s.id}>${s.name}</option>`)}
           </select>
@@ -3497,12 +3523,15 @@ export class AlMumtazCrm extends LitElement {
         ${this.selectedPaymentType === 'course' ? html`
           <div class="input-group">
             <label class="input-label" for="pay-class">Pilih Kelas</label>
-            <select class="input-field" id="pay-class" @change=${(e: any) => this.selectedClassForPaymentId = e.target.value} required>
-              <option value="">-- Pilih Kelas --</option>
-              ${this.classes.filter(c => c.status === 'active').map(c => html`
+            <select class="input-field" id="pay-class" @change=${(e: any) => this.selectedClassForPaymentId = e.target.value} ?disabled=${this.loadingStudentClasses} required>
+              <option value="">${this.loadingStudentClasses ? '-- Memuat kelas siswa... --' : '-- Pilih Kelas --'}</option>
+              ${this.selectedStudentClasses.map(c => html`
                 <option value=${c.id}>${c.name} (${this.formatRupiah(c.monthly_fee)})</option>
               `)}
             </select>
+            ${!this.loadingStudentClasses && this.selectedStudentClasses.length === 0 && this.selectedPaymentStudentId ? html`
+              <span style="font-size:11px; color:var(--status-rejected); margin-top:4px; display:block;">Siswa ini tidak terdaftar di kelas aktif mana pun.</span>
+            ` : ''}
           </div>
         ` : html`
           <div class="input-group">
