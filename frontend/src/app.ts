@@ -176,6 +176,7 @@ export class AlMumtazCrm extends LitElement {
   @state() private selectedTutorShareDetails: any[] = []
   @state() private loadingTutorShareDetails = false
   @state() private selectedSettingsTab: 'notifications' | 'admin-fee' | 'account' = 'notifications'
+  @state() private selectedUserRoleFilter = ''
 
   // Participant & Payment Search States
   @state() private participantSearchQuery = ''
@@ -1154,6 +1155,7 @@ export class AlMumtazCrm extends LitElement {
     this.selectedTutorShareDetails = []
     this.loadingTutorShareDetails = false
     this.selectedSettingsTab = 'notifications'
+    this.selectedUserRoleFilter = ''
     this.participantSearchQuery = ''
     this.paymentSearchQuery = ''
     this.userSearchQuery = ''
@@ -2384,6 +2386,13 @@ export class AlMumtazCrm extends LitElement {
   private renderUsers() {
     const query = this.userSearchQuery.toLowerCase().trim()
     const filteredUsers = this.users.filter(u => {
+      // Filter by role dropdown
+      if (this.selectedUserRoleFilter) {
+        if (this.selectedUserRoleFilter === 'siswa' && !u.is_participant) return false
+        if (this.selectedUserRoleFilter === 'tutor' && !u.is_tutor) return false
+        if (this.selectedUserRoleFilter === 'staff' && !u.is_staff) return false
+      }
+
       if (query === '') return true
       const matchesName = u.name && u.name.toLowerCase().includes(query)
       const matchesUsername = u.username && u.username.toLowerCase().includes(query)
@@ -2407,14 +2416,25 @@ export class AlMumtazCrm extends LitElement {
         ` : ''}
       </div>
 
-      <!-- Search Box -->
-      <div class="input-group" style="position:relative; margin-bottom:16px;">
-        <input class="input-field" type="text" placeholder="Cari nama, username, email, telp, atau role (siswa/tutor/staff)..." 
-               .value=${this.userSearchQuery} 
-               @input=${(e: any) => this.userSearchQuery = e.target.value} 
-               style="padding-left:38px;" />
-        <div style="position:absolute; left:12px; top:12px; color:var(--text-muted);">
-          ${this.iconSearch()}
+      <!-- Search & Filter Controls -->
+      <div style="display:flex; gap:12px; margin-bottom:16px; align-items: center; flex-wrap: wrap;">
+        <div class="input-group" style="position:relative; flex: 2; min-width: 250px; margin: 0;">
+          <input class="input-field" type="text" placeholder="Cari nama, username, email, telp, atau role (siswa/tutor/staff)..." 
+                 .value=${this.userSearchQuery} 
+                 @input=${(e: any) => this.userSearchQuery = e.target.value} 
+                 style="padding-left:38px;" />
+          <div style="position:absolute; left:12px; top:12px; color:var(--text-muted);">
+            ${this.iconSearch()}
+          </div>
+        </div>
+        
+        <div class="input-group" style="flex: 1; min-width: 150px; margin: 0;">
+          <select class="input-field" .value=${this.selectedUserRoleFilter} @change=${(e: any) => { this.selectedUserRoleFilter = e.target.value; this.requestUpdate(); }}>
+            <option value="">Semua Peran / Role</option>
+            <option value="siswa">Siswa</option>
+            <option value="tutor">Tutor / Guru</option>
+            <option value="staff">Staff Lembaga</option>
+          </select>
         </div>
       </div>
 
