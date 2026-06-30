@@ -2399,7 +2399,7 @@ export class AlMumtazCrm extends LitElement {
 
     return html`
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
-        <h2>Manajemen Pengguna</h2>
+        <h2>Manajemen Peserta dan Pengguna</h2>
         ${this.hasPermission('create') ? html`
           <button class="btn btn-primary" style="padding: 8px 12px; font-size: 12px;" @click=${() => { this.selectedUser = null; this.isStaffSelected = false; this.activeModal = 'user-add'; }}>
             ${this.iconPlus()} Tambah User
@@ -2477,7 +2477,7 @@ export class AlMumtazCrm extends LitElement {
         </button>
         <button class="tab-btn ${this.selectedSettingsTab === 'account' ? 'tab-btn-active' : ''}" 
                 @click=${() => { this.selectedSettingsTab = 'account'; }}>
-          Kelola Akun
+          Kelola user
         </button>
       </div>
 
@@ -2555,7 +2555,7 @@ export class AlMumtazCrm extends LitElement {
       ${this.selectedSettingsTab === 'account' ? html`
         <!-- Section: Manajemen Pengguna & Keluar -->
         <div class="card" style="display:flex; flex-direction:column; gap:16px;">
-          <h3 style="margin-bottom: 4px;">Kelola Akun & Keamanan</h3>
+          <h3 style="margin-bottom: 4px;">Kelola user & Keamanan</h3>
           <p style="font-size: 13px; color:var(--text-muted); margin-bottom: 8px;">Atur akun pengguna staff/guru yang memiliki hak akses masuk ke sistem, atau keluar dari sesi aktif.</p>
           
           <div style="display:flex; flex-direction:column; gap:12px; align-items:flex-start;">
