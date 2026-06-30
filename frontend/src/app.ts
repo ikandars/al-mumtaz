@@ -137,7 +137,7 @@ export class AlMumtazCrm extends LitElement {
   @state() private adminFeeConfig: AdminFeeConfig = { enabled: true, tiers: [] }
 
   // Modal controls
-  @state() private activeModal: 'payment-add' | 'payment-detail' | 'user-add' | 'user-edit' | 'class-add' | 'class-edit' | 'class-members' | 'exam-add' | 'exam-edit' | 'participant-detail' | 'expense-add' | 'other-income-add' | 'tutor-share-detail' | null = null
+  @state() private activeModal: 'payment-add' | 'payment-detail' | 'user-add' | 'user-edit' | 'class-add' | 'class-edit' | 'class-members' | 'class-detail' | 'exam-add' | 'exam-edit' | 'participant-detail' | 'expense-add' | 'other-income-add' | 'tutor-share-detail' | null = null
 
   // Finance & Expenses states
   @state() private financeTab: 'payments' | 'expenses' | 'other_incomes' = 'payments'
@@ -2267,7 +2267,7 @@ export class AlMumtazCrm extends LitElement {
             <p>${query === '' ? 'Belum ada kelas terdaftar.' : 'Tidak ada kelas yang cocok dengan pencarian Anda.'}</p>
           </div>
         ` : filteredClasses.map(c => html`
-          <div class="list-card" style="cursor: default;" @click=${() => {}}>
+          <div class="list-card" style="cursor: pointer;" @click=${() => this.openClassDetail(c)}>
             <div class="list-card-header">
               <span class="list-card-title">${c.name}</span>
               <span class="badge badge-${c.status === 'active' ? 'approved' : 'rejected'}">
@@ -2292,7 +2292,7 @@ export class AlMumtazCrm extends LitElement {
             </div>
 
             <!-- Class Actions -->
-            <div style="margin-top:14px; display:flex; gap:8px; justify-content: flex-end;">
+            <div style="margin-top:14px; display:flex; gap:8px; justify-content: flex-end;" @click=${(e: Event) => e.stopPropagation()}>
               <button class="btn btn-secondary" style="padding: 6px 10px; font-size: 11px;" @click=${() => this.openClassMembers(c)}>
                 Kelola Anggota
               </button>
@@ -2322,6 +2322,13 @@ export class AlMumtazCrm extends LitElement {
     this.selectedClass = c
     this.loadClassMembers(c.id)
     this.activeModal = 'class-members'
+  }
+
+  private openClassDetail(c: ClassModel) {
+    this.selectedClass = c
+    this.selectedClassMembers = []
+    this.loadClassMembers(c.id)
+    this.activeModal = 'class-detail'
   }
 
   private renderExamsList() {
@@ -3875,6 +3882,10 @@ export class AlMumtazCrm extends LitElement {
         modalTitle = `Anggota: ${this.selectedClass?.name}`
         modalBody = this.renderClassMembersList()
         break
+      case 'class-detail':
+        modalTitle = `Detail Kelas: ${this.selectedClass?.name}`
+        modalBody = this.renderClassDetailModal()
+        break
       case 'exam-add':
         modalTitle = 'Jadwal Ujian'
         modalBody = this.renderExamForm(true)
@@ -5112,5 +5123,86 @@ export class AlMumtazCrm extends LitElement {
         ` : ''}
       </div>
     `;
+  }
+
+  private renderClassDetailModal() {
+    const c = this.selectedClass
+    if (!c) return html``
+
+    return html`
+      <div>
+        <div style="margin-bottom: 20px; border-bottom: 1px solid #f3f4f6; padding-bottom: 12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span class="badge badge-${c.status === 'active' ? 'approved' : 'rejected'}">
+              ${c.status === 'active' ? 'Aktif' : 'Nonaktif'}
+            </span>
+            <span style="font-size:14px; font-weight:700; color:var(--primary);">${this.formatRupiah(c.monthly_fee)} / bln</span>
+          </div>
+          <h1 style="font-size:20px; margin-top:8px;">${c.name}</h1>
+          <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">
+            ${c.description || 'Tidak ada deskripsi untuk kelas ini.'}
+          </p>
+        </div>
+
+        <div style="background-color:#f9fafb; border-radius:12px; padding:16px; margin-bottom:16px; font-size:13px; display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--text-muted);">Biaya Bulanan:</span>
+            <strong style="color:var(--text);">${this.formatRupiah(c.monthly_fee)} / Bulan</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--text-muted);">Jumlah Anggota:</span>
+            <strong style="color:var(--text);">${c.member_count} Siswa</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; border-top:1px dashed #e5e7eb; padding-top:8px; flex-direction:column; gap:4px;">
+            <span style="color:var(--text-muted);">Pengajar / Tutor:</span>
+            <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">
+              ${c.tutors.length === 0 ? html`
+                <span style="color:var(--status-rejected); font-weight:600;">Belum ditentukan</span>
+              ` : c.tutors.map(t => html`
+                <span class="badge badge-approved" style="background:#f5f3ff; color:#5b21b6; font-size:11px;">${t.name}</span>
+              `)}
+            </div>
+          </div>
+        </div>
+
+        <h3 style="font-size:14px; margin-bottom:10px; color:var(--text);">Daftar Siswa Terdaftar:</h3>
+
+        <div style="max-height:220px; overflow-y:auto; padding-right:4px;">
+          ${this.selectedClassMembers && this.selectedClassMembers.length > 0 ? html`
+            <table class="report-table" style="min-width: 100%; font-size: 12px;">
+              <thead>
+                <tr>
+                  <th style="text-align: left; padding: 6px 8px;">Nama</th>
+                  <th style="text-align: left; padding: 6px 8px;">Kontak (Telp)</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${this.selectedClassMembers.map(m => html`
+                  <tr>
+                    <td style="padding: 6px 8px; font-weight:600; color:var(--text);">${m.name}</td>
+                    <td style="padding: 6px 8px; color:var(--text-muted); font-family:monospace;">${m.phone || '-'}</td>
+                  </tr>
+                `)}
+              </tbody>
+            </table>
+          ` : html`
+            <div style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px; background:#f9fafb; border-radius:12px;">
+              Tidak ada siswa yang terdaftar di kelas ini.
+            </div>
+          `}
+        </div>
+
+        <div style="margin-top:20px; display:flex; gap:10px;">
+          <button class="btn btn-secondary" style="flex:1;" @click=${() => { this.activeModal = null; this.openClassMembers(c); }}>
+            Kelola Anggota
+          </button>
+          ${this.hasPermission('update') ? html`
+            <button class="btn btn-primary" style="flex:1;" @click=${() => { this.activeModal = null; this.openClassEdit(c); }}>
+              Edit Kelas
+            </button>
+          ` : ''}
+        </div>
+      </div>
+    `
   }
 }
